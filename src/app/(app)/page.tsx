@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ExampleButtons } from "./_examples/example-buttons";
 import { requireMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
@@ -47,7 +48,12 @@ export default async function HomePage() {
           Editais e distribuidoras de referência aparecem para todas as ESCOs. Clientes,
           projetos e interações são só de {org.name}.
         </p>
-        {role === "admin" && <ExampleButtons loaded={Boolean(examples)} />}
+        <div className="row">
+          {role === "admin" && <ExampleButtons loaded={Boolean(examples)} />}
+          <Link href="/conferencia" className="btn">
+            Conferir cálculos
+          </Link>
+        </div>
       </section>
     </>
   );

@@ -82,6 +82,23 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .stats b { font-size: 26px; font-weight: 500; line-height: 1.1; }
 .stats span { font-size: 13px; color: var(--ink-2); }
 
+.msg.warn { background: var(--warn-soft); color: var(--warn); }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--soft); color: var(--ink-2); white-space: nowrap; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+.empty { padding: 28px; text-align: center; color: var(--ink-2); border: 1px dashed var(--line-2); border-radius: var(--r); display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin: 0; }
+.facts div { display: flex; flex-direction: column; gap: 2px; }
+.facts dt { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); font-weight: 600; }
+.facts dd { margin: 0; }
+.facts dd.num { font-size: 20px; }
+.issues { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.issues li { padding-left: 16px; position: relative; font-size: 14px; }
+.issues li::before { content: ""; position: absolute; left: 0; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+.issues li.bad::before { background: var(--bad); }
+.next { padding: 10px 12px; background: var(--accent-soft); border-radius: 8px; color: var(--accent); }
+
 .solo { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
 .solo .box { width: 100%; max-width: 400px; gap: 18px; }
 .solo form { display: flex; flex-direction: column; gap: 14px; }
