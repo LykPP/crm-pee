@@ -38,10 +38,16 @@ O produto será usado primeiro pela nossa ESCO e depois vendido a outras ESCOs (
 ## Como trabalhar neste repositório
 - Antes de codar uma fase, proponha o plano e espere aprovação.
 - Escreva testes para a lógica de negócio (validade de documentos, cálculo de RCB,
-  limites por rubrica). Os valores do protótipo com os dados de exemplo servem de
-  referência: Hospital São Lucas (p1) dá PEE ≈ R$ 730.107 e RCB ≈ 0,534;
-  Vale do Sereno (p2) PEE ≈ R$ 2.704.718 e RCB ≈ 0,432; Escolas (p3) PEE ≈
-  R$ 636.333 e RCB ≈ 0,663.
+  limites por rubrica). A referência é a planilha oficial de RCB da Cemig
+  (`docs/editais/Planilha-RCB-CPP-2026-rev01.xlsx`), que inclui a auditoria contábil
+  e financeira de R$ 1.500 exigida pela ET 5.16.1 (o protótipo não a incluía).
+  Com os dados de exemplo: Hospital São Lucas (p1) dá PEE ≈ R$ 731.607 e
+  RCB ≈ 0,535; Vale do Sereno (p2) PEE ≈ R$ 2.706.218 e RCB ≈ 0,433; Escolas (p3)
+  PEE ≈ R$ 637.833 e RCB ≈ 0,665. Sem a auditoria, os valores são idênticos aos do
+  protótipo (p1 R$ 730.107 e 0,534). `scripts/check-official-rcb.py` repete a
+  conferência na planilha quando a distribuidora publicar uma revisão.
+- A planilha oficial também calcula a RCB por uso final: acima do limite é alerta,
+  não desclassifica (Regulamento 11.1.2), mas deve aparecer na interface.
 - Nunca colocar segredos no código; usar variáveis de ambiente e `.env.example`.
 - Explique em linguagem simples o que foi feito ao fim de cada tarefa: o dono do
   projeto não é desenvolvedor.
