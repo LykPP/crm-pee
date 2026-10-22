@@ -9,21 +9,27 @@ export function StageSelect({
   stage,
   action,
   disabled,
+  compact,
 }: {
   stage: Stage;
   action: (prev: FormState, form: FormData) => Promise<FormState>;
   disabled?: boolean;
+  /** Small select without a visible label, for cards. */
+  compact?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, {});
   return (
     <form className="row" onSubmit={(e) => e.preventDefault()}>
-      <label className="small muted" htmlFor="stage">
-        Etapa
-      </label>
+      {!compact && (
+        <label className="small muted" htmlFor="stage">
+          Etapa
+        </label>
+      )}
       <select
-        id="stage"
+        id={compact ? undefined : "stage"}
+        aria-label={compact ? "Etapa" : undefined}
         name="stage"
-        className="btn"
+        className={compact ? "kselect" : "btn"}
         defaultValue={stage}
         disabled={disabled || pending}
         onChange={(e) => {
