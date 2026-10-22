@@ -61,10 +61,33 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .help { font-size: 13px; color: var(--ink-3); }
 
+.btn { cursor: pointer; border: 1px solid var(--line-2); background: var(--surface); padding: 8px 14px; border-radius: 8px; font-weight: 500; display: inline-flex; gap: 6px; align-items: center; justify-content: center; text-decoration: none; color: var(--ink); font-size: 14px; }
+.btn:hover { border-color: var(--ink-3); background: var(--soft); }
+.btn:disabled { opacity: .6; cursor: default; }
+.btn.pri { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.pri:hover { background: #0a5651; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--accent); padding: 0; }
+.btn.ghost:hover { text-decoration: underline; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.field input { border: 1px solid var(--line-2); background: var(--surface); border-radius: 8px; padding: 8px 10px; width: 100%; }
+.field .hint { font-size: 12px; color: var(--ink-3); }
+.msg { font-size: 14px; padding: 10px 12px; border-radius: 8px; }
+.msg.ok { background: var(--ok-soft); color: var(--ok); }
+.msg.bad { background: var(--bad-soft); color: var(--bad); }
+
+.solo { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
+.solo .box { width: 100%; max-width: 400px; gap: 18px; }
+.solo form { display: flex; flex-direction: column; gap: 14px; }
+.who { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--ink-3); padding: 0 10px; overflow-wrap: anywhere; }
+.who b { color: var(--ink-2); font-weight: 600; }
+
 @media (max-width: 760px) {
   .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .side { position: sticky; top: env(safe-area-inset-top, 0px); height: auto; z-index: 5; flex-direction: row; align-items: center; padding: 8px max(12px, env(safe-area-inset-left, 0px)); gap: 10px; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
   .brand span, .side .foot, .nav a small { display: none; }
+  .side .foot.keep { display: flex; margin: 0 0 0 auto; padding: 0; flex-shrink: 0; }
+  .side .foot.keep .who { display: none; }
   .nav { flex-direction: row; }
   h1 { font-size: 25px; }
 }
