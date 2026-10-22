@@ -74,3 +74,11 @@ export async function listExecutionSteps(supabase: Supabase, projectId: string) 
   );
   return rows as ExecutionStep[];
 }
+
+export async function listAllExecutionSteps(supabase: Supabase) {
+  const rows = must(
+    await supabase.from("execution_steps").select("project_id, step_key, status, started_on, finished_on"),
+    "execution steps",
+  );
+  return rows as (ExecutionStep & { project_id: string })[];
+}

@@ -64,3 +64,8 @@ export function whatsappUrl(phone: string, text = "") {
   const digits = phone.replace(/\D/g, "").replace(/^55/, "");
   return `https://wa.me/55${digits}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
 }
+
+/** "quinta-feira, 22 de outubro" → "Quinta-feira, 22 de outubro". */
+export function capitalize(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
