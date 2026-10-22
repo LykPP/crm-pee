@@ -217,6 +217,18 @@ a.tile:hover { border-color: var(--line-2); background: var(--soft); }
 .docrow .grow { flex: 1; min-width: 220px; }
 .docrow .s { font-size: 13px; color: var(--ink-3); overflow-wrap: anywhere; }
 
+.verdict { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; border-radius: var(--r); padding: 18px 20px; background: var(--soft); }
+.verdict.ok { background: var(--ok-soft); }
+.verdict.bad { background: var(--bad-soft); }
+.verdict .big { font-family: var(--f-display); font-size: 48px; font-weight: 700; line-height: 1; }
+.verdict.ok .big { color: var(--ok); }
+.verdict.bad .big { color: var(--bad); }
+.verdict .grow { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 4px; }
+.verdict .grow b { font-size: 16px; }
+.gauge { position: relative; height: 8px; background: var(--line); border-radius: 4px; margin-top: 6px; }
+.gauge .fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; }
+.gauge b { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--ink); }
+
 .solo { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
 .solo .box { width: 100%; max-width: 400px; gap: 18px; }
 .solo form { display: flex; flex-direction: column; gap: 14px; }

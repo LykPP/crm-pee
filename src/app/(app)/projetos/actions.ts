@@ -6,14 +6,17 @@ import { z } from "zod";
 import {
   checkbox,
   dbError,
+  numberIn,
   optionalDate,
+  optionalMoney,
+  optionalPositive,
   optionalText,
   optionalUrl,
   parseForm,
   requiredText,
   type FormState,
 } from "@/lib/forms";
-import { STAGES } from "@/lib/pee";
+import { COST_FIELDS, END_USES, STAGES } from "@/lib/pee";
 import { requireMembership, type MemberRole } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -202,5 +205,79 @@ export async function saveDocument(
         consumer_unit_id: unitId,
       });
   if (res.error) return { error: dbError(res.error, "Não foi possível salvar o documento.") };
+  return done(projectId);
+}
+
+const actionSchema = z.object({
+  end_use: z.enum(END_USES),
+  description: optionalText,
+  quantity: numberIn("Quantidade", 0),
+  useful_life_years: numberIn("Vida útil", 1, 50),
+  power_before_w: numberIn("Potência antes", 0),
+  power_after_w: numberIn("Potência depois", 0),
+  hours_per_year: numberIn("Horas de uso por ano", 0, 8760),
+  unit_cost: numberIn("Custo unitário", 0),
+  peak_hours_per_day: numberIn("Horas por dia na ponta", 0, 3),
+  peak_days_per_month: numberIn("Dias úteis por mês na ponta", 0, 22),
+  months_per_year: numberIn("Meses de uso por ano", 0, 12),
+  energy_saved_mwh_override: optionalPositive,
+  peak_reduction_kw_override: optionalPositive,
+});
+
+export async function addAction(projectId: string, _prev: FormState, form: FormData): Promise<FormState> {
+  const ctx = await context(DETAIL_EDITORS);
+  if (!ctx) return DENIED;
+  const { data, error } = parseForm(actionSchema, form);
+  if (!data) return { error };
+  const { count } = await ctx.supabase
+    .from("efficiency_actions")
+    .select("id", { count: "exact", head: true })
+    .eq("project_id", projectId);
+  const res = await ctx.supabase
+    .from("efficiency_actions")
+    .insert({ ...data, org_id: ctx.org.id, project_id: projectId, position: count ?? 0 });
+  if (res.error) return { error: dbError(res.error, "Não foi possível adicionar a ação.") };
+  return done(projectId);
+}
+
+export async function updateAction(
+  projectId: string,
+  actionId: string,
+  _prev: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await context(DETAIL_EDITORS);
+  if (!ctx) return DENIED;
+  const { data, error } = parseForm(actionSchema, form);
+  if (!data) return { error };
+  const res = await ctx.supabase.from("efficiency_actions").update(data).eq("id", actionId).select("id");
+  if (res.error) return { error: dbError(res.error, "Não foi possível salvar a ação.") };
+  if (!res.data.length) return DENIED;
+  return done(projectId);
+}
+
+export async function deleteAction(projectId: string, actionId: string): Promise<FormState> {
+  const ctx = await context(DETAIL_EDITORS);
+  if (!ctx) return DENIED;
+  const res = await ctx.supabase.from("efficiency_actions").delete().eq("id", actionId);
+  if (res.error) return { error: dbError(res.error, "Não foi possível remover a ação.") };
+  return done(projectId);
+}
+
+const costsSchema = z.object(
+  Object.fromEntries(COST_FIELDS.map(([key]) => [key, optionalMoney.transform((v) => v ?? 0)])),
+);
+
+export async function saveCosts(projectId: string, _prev: FormState, form: FormData): Promise<FormState> {
+  const ctx = await context(DETAIL_EDITORS);
+  if (!ctx) return DENIED;
+  const { data, error } = parseForm(costsSchema, form);
+  if (!data) return { error };
+  const found = await ctx.supabase.from("project_costs").select("id").eq("project_id", projectId).maybeSingle();
+  if (found.error) return { error: dbError(found.error, "Não foi possível salvar os custos.") };
+  const res = found.data
+    ? await ctx.supabase.from("project_costs").update(data).eq("id", found.data.id)
+    : await ctx.supabase.from("project_costs").insert({ ...data, org_id: ctx.org.id, project_id: projectId });
+  if (res.error) return { error: dbError(res.error, "Não foi possível salvar os custos.") };
   return done(projectId);
 }

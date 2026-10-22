@@ -10,10 +10,10 @@ import {
 } from "@/lib/pee";
 import type { ChecklistItem } from "@/lib/calls/rules-schema";
 import type { Call, ProjectDocument } from "@/lib/pee";
-import { exampleBundles } from "./fixtures";
+import { exampleBundles, prototypeBundles } from "./fixtures";
 
-describe("reference values from CLAUDE.md", () => {
-  const b = exampleBundles();
+describe("reference values from CLAUDE.md (prototype, before the audit)", () => {
+  const b = prototypeBundles();
   it.each([
     ["p1", 730107, 0.534],
     ["p2", 2704718, 0.432],
@@ -134,6 +134,22 @@ describe("limits and RCB", () => {
     const texts = projectIssues(x, [], "2026-10-22").map((i) => i.text);
     expect(texts).toContain("Diagnóstico energético acima do limite (ET 5.4.1.1)");
     expect(texts.some((t) => /^RCB .* acima do limite 0,75$/.test(t))).toBe(true);
+  });
+
+  it("warns about an end use above the limit while the total passes", () => {
+    const issues = projectIssues(exampleBundles().p1, [], "2026-10-22");
+    expect(issues).toContainEqual({
+      tone: "warn",
+      text: "RCB de Climatização 0,94 acima do limite 0,75",
+      area: "rcb",
+      code: "end_use_rcb",
+    });
+  });
+
+  it("uses the incentivized limit when there are only incentivized sources and storage", () => {
+    const x = structuredClone(exampleBundles().p1);
+    x.actions = x.actions!.map((a, i) => ({ ...a, end_use: i ? "Armazenamento (SAE)" : "Fonte incentivada (FV)" }));
+    expect(calcProject(x.project, x.call, x.actions, x.costs).rcbMax).toBe(0.9);
   });
 
   it("skips cost checks when the viewer cannot see costs", () => {

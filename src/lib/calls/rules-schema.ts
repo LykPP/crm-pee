@@ -89,6 +89,8 @@ export const callRulesSchema = z
       .strict()
       .optional(),
     mop: z.object({ fixed: z.number().nonnegative(), pct: z.number().min(0).max(1) }).strict().optional(),
+    /** Fixed accounting and financial audit charged by the utility (Cemig: ET 5.16.1). */
+    audit: z.object({ fixed: z.number().nonnegative(), ref: z.string().optional() }).strict().optional(),
     avoidedCosts: z
       .array(
         z

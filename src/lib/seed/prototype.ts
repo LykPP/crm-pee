@@ -39,6 +39,7 @@ export interface ProtoCall {
   retornoCD?: string;
   limites?: Record<string, number | { pct: number; teto?: number }>;
   mop?: { fixo: number; pct: number };
+  auditoria?: { fixo: number; ref?: string };
   custosEvitados?: { nivel: string; desc?: string; cee: number; ced: number }[];
   checklist?: {
     id: string;
@@ -264,6 +265,7 @@ export function convertCallRules(call: ProtoCall): CallRules {
         ]),
       ),
     mop: call.mop && { fixed: call.mop.fixo, pct: call.mop.pct },
+    audit: call.auditoria && { fixed: call.auditoria.fixo, ref: call.auditoria.ref },
     avoidedCosts: call.custosEvitados?.map((c) => ({
       level: c.nivel,
       description: c.desc,

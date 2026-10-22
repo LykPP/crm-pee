@@ -37,3 +37,15 @@ export function exampleBundles(): Record<string, ProjectBundle> {
   });
   return out;
 }
+
+/**
+ * The prototype predates the R$ 1.500 audit required by ET 5.16.1, so
+ * comparisons with its code use the calls without it.
+ */
+export function prototypeBundles(): Record<string, ProjectBundle> {
+  const out = exampleBundles();
+  for (const b of Object.values(out)) {
+    if (b.call) b.call = { ...b.call, rules: { ...b.call.rules, audit: undefined } };
+  }
+  return out;
+}

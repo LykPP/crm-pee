@@ -1,7 +1,8 @@
 /**
  * PEE budget and cost-benefit ratio (RCB), following PROPEE module 7 as
- * implemented in the prototype. This is an estimate: the utility's
- * official spreadsheet prevails.
+ * implemented in the prototype and checked against Cemig's official RCB
+ * workbook (scripts/check-official-rcb.py). This is an estimate: the
+ * utility's official spreadsheet prevails.
  */
 import type { RubricLimit } from "@/lib/calls/rules-schema";
 import { brl } from "./format";
@@ -27,6 +28,16 @@ export interface ActionResult extends EfficiencyAction {
   benefit: number;
 }
 
+/** Totals for one end use, as in the RCB sheet of the official workbook. */
+export interface EndUseResult {
+  endUse: string;
+  energySavedMwh: number;
+  peakReductionKw: number;
+  annualizedCost: number;
+  annualBenefit: number;
+  rcb: number;
+}
+
 export interface LimitCheck {
   name: string;
   ref: string;
@@ -47,6 +58,8 @@ export interface CalcResult {
   counterpart: number;
   mop: number;
   admp: number;
+  /** Fixed audit charged by the utility, when the call requires one. */
+  audit: number;
   peeTotal: number;
   total: number;
   annualBenefit: number;
@@ -56,6 +69,8 @@ export interface CalcResult {
   rcbPee: number;
   /** RCB including the counterpart. */
   rcbTotal: number;
+  /** RCB of each end use; above the limit is a warning, not a disqualification. */
+  byEndUse: EndUseResult[];
   /** Maximum RCB for this project, or null when the call does not say. */
   rcbMax: number | null;
   incentivizedOnly: boolean;
@@ -138,22 +153,44 @@ export function calcProject(
   // Utility's own cost (MOP) and administration (ADMP), per PROPEE.
   const mop = rules.mop ? rules.mop.fixed + rules.mop.pct * (E + MOT + MKT + TR + DS + MV) : 0;
   const admp = Math.max(0, (E + MOT + TR + DS + MV) / 19 - MKT);
-  const peeTotal = E + MOT + MKT + TR + DS + MV + mop + admp;
+  const audit = rules.audit?.fixed ?? 0;
+  const peeTotal = E + MOT + MKT + TR + DS + MV + mop + admp + audit;
   const total = peeTotal + CP;
 
   // Indirect costs are spread over actions by their share of equipment cost
   // and annualized over each action's useful life.
   let annualizedPee = 0;
   let annualizedTotal = 0;
+  const uses = new Map<string, EndUseResult>();
   for (const a of actions) {
     const share = E ? a.cost / E : 0;
     const crf = capitalRecoveryFactor(i, a.useful_life_years);
-    annualizedPee += (a.cost + (peeTotal - E) * share) * crf;
+    const cost = (a.cost + (peeTotal - E) * share) * crf;
+    annualizedPee += cost;
     annualizedTotal += (a.cost + (total - E) * share) * crf;
+    const u = uses.get(a.end_use) ?? {
+      endUse: a.end_use,
+      energySavedMwh: 0,
+      peakReductionKw: 0,
+      annualizedCost: 0,
+      annualBenefit: 0,
+      rcb: NaN,
+    };
+    u.energySavedMwh += a.energySavedMwh;
+    u.peakReductionKw += a.peakReductionKw;
+    u.annualizedCost += cost;
+    u.annualBenefit += a.benefit;
+    uses.set(a.end_use, u);
   }
+  const byEndUse = [...uses.values()].map((u) => ({
+    ...u,
+    rcb: u.annualBenefit ? u.annualizedCost / u.annualBenefit : NaN,
+  }));
   const annualBenefit = actions.reduce((s, a) => s + a.benefit, 0);
 
-  const incentivizedOnly = actions.length > 0 && actions.every((a) => /Fonte incentivada/.test(a.end_use));
+  // As in the official workbook, storage counts with incentivized sources.
+  const incentivizedOnly =
+    actions.length > 0 && actions.every((a) => /Fonte incentivada|Armazenamento/.test(a.end_use));
   const rcbMax = rules.maxBcr
     ? ((incentivizedOnly ? rules.maxBcr.incentivizedOnly : rules.maxBcr[project.modality]) ?? null)
     : null;
@@ -197,6 +234,7 @@ export function calcProject(
     counterpart: CP,
     mop,
     admp,
+    audit,
     peeTotal,
     total,
     annualBenefit,
@@ -204,6 +242,7 @@ export function calcProject(
     peakReductionKw: actions.reduce((s, a) => s + a.peakReductionKw, 0),
     rcbPee: annualBenefit ? annualizedPee / annualBenefit : NaN,
     rcbTotal: annualBenefit ? annualizedTotal / annualBenefit : NaN,
+    byEndUse,
     rcbMax,
     incentivizedOnly,
     typology: typology && { name: typology.name, min: typology.min, max: typology.max },
@@ -211,3 +250,29 @@ export function calcProject(
     avoidedCost: { energyCost: avoided.energyCost, demandCost: avoided.demandCost },
   };
 }
+
+/** End uses offered when registering an efficiency action, as in the prototype. */
+export const END_USES = [
+  "Iluminação",
+  "Climatização",
+  "Motores",
+  "Refrigeração",
+  "Aquecimento solar",
+  "Fonte incentivada (FV)",
+  "Armazenamento (SAE)",
+  "Outros",
+] as const;
+
+/** Cost rubrics of a project, with the prototype's labels. */
+export const COST_FIELDS: [keyof ProjectCosts, string][] = [
+  ["diagnosis", "Diagnóstico energético"],
+  ["executive_design", "Projeto executivo"],
+  ["management", "Gerenciamento"],
+  ["final_report", "Relatório final"],
+  ["other_services", "Outros serviços de terceiros (instalação)"],
+  ["marketing", "Marketing"],
+  ["training", "Treinamento e capacitação"],
+  ["disposal", "Descarte"],
+  ["measurement_verification", "Medição e verificação"],
+  ["counterpart", "Contrapartida (cliente ou terceiros)"],
+];

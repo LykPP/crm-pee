@@ -11,7 +11,8 @@ de RCB), submissão às chamadas públicas das distribuidoras e execução.
 | `prototype/crm-prototipo.html` | Protótipo aprovado pela equipe; referência de telas e regras |
 | `prototype/seed/` | Dados no formato do protótipo: editais reais e exemplos fictícios |
 | `docs/SPEC.md` | Especificação da versão 1 |
-| `docs/editais/` | PDFs originais da CPP Cemig 001/2026 |
+| `docs/editais/` | PDFs e planilha oficial de RCB da CPP Cemig 001/2026 |
+| `scripts/check-official-rcb.py` | Roda os exemplos na planilha oficial da Cemig (requer LibreOffice) |
 | `CLAUDE.md` | Contexto e decisões do projeto |
 
 ## Situação

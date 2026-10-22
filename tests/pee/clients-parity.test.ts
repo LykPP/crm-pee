@@ -3,11 +3,11 @@ import { clientMessage, type ClientMessageKind } from "@/lib/messages";
 import { feasibility, folderTree, phaseIndex } from "@/lib/pee";
 import { seedCalls, seedClients, seedProjects, seedUtilities } from "@/lib/seed/data";
 import { convertClient } from "@/lib/seed/prototype";
-import { exampleBundles } from "./fixtures";
+import { prototypeBundles } from "./fixtures";
 import { loadPrototype } from "./prototype-runtime";
 
 const proto = loadPrototype();
-const bundles = exampleBundles();
+const bundles = prototypeBundles();
 const TODAY = "2026-10-22";
 
 describe("feasibility badge matches the prototype", () => {

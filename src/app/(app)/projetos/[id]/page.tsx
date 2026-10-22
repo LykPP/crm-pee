@@ -10,6 +10,7 @@ import { StageSelect } from "../stage-select";
 import { deleteProject, setFolder, setStage, updateProject } from "../actions";
 import { DocumentsTab } from "./documents-tab";
 import { UnitsSection } from "./units";
+import { ViabilityTab } from "./viability-tab";
 import { listClients } from "@/lib/data/clients";
 import { projectFormOptions } from "@/lib/data/project-options";
 import { CAN_SEE_COSTS, loadProjectBundles } from "@/lib/data/projects";
@@ -47,8 +48,7 @@ const TAB_FOR_AREA: Record<IssueArea, Tab> = {
   conflicts: "visao",
 };
 
-const COMING: Record<Exclude<Tab, "visao" | "documentos">, string> = {
-  viabilidade: "etapa 9",
+const COMING: Record<Exclude<Tab, "visao" | "documentos" | "viabilidade">, string> = {
   execucao: "etapa 10",
 };
 
@@ -224,6 +224,20 @@ export default async function ProjectPage({
             today,
           })}
         />
+      ) : tab === "viabilidade" ? (
+        k ? (
+          <ViabilityTab
+            bundle={bundle}
+            k={k}
+            canEdit={canEditDetails}
+            voltageLevel={p.voltage_level}
+            discountRate={bundle.call?.rules.discountRate ?? 0.08}
+          />
+        ) : (
+          <div className="box">
+            <p className="help">O seu papel não permite ver custos e ações de eficiência.</p>
+          </div>
+        )
       ) : tab !== "visao" ? (
         <div className="box">
           <p className="help">Esta aba ainda está em construção. Previsão: {COMING[tab]} do plano da Fase 1.</p>

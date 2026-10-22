@@ -6,14 +6,14 @@ import {
   projectIssues,
   summarizeDocuments,
 } from "@/lib/pee";
-import { exampleBundles } from "./fixtures";
+import { prototypeBundles } from "./fixtures";
 import { loadPrototype } from "./prototype-runtime";
 
 // Fixed date; every example call has a submission deadline, so the
 // prototype never falls back to the real "today".
 const TODAY = "2026-10-22";
 const proto = loadPrototype();
-const bundles = exampleBundles();
+const bundles = prototypeBundles();
 const all = Object.values(bundles);
 const ids = Object.keys(bundles);
 
@@ -77,7 +77,8 @@ describe.each(ids)("project %s matches the prototype", (id) => {
   });
 
   it("issues and next step", () => {
-    const mine = projectIssues(b, all, TODAY);
+    // Per end use RCB warnings come from the official workbook, not the prototype.
+    const mine = projectIssues(b, all, TODAY).filter((i) => i.code !== "end_use_rcb");
     const theirs = proto.projIssues(p);
     const areas: Record<string, string> = { docs: "docs", rcb: "rcb", valid: "conflicts" };
     expect(mine.map((i) => [i.tone, i.text, i.area])).toEqual(

@@ -75,3 +75,38 @@ export function dbError(error: { message: string; code?: string }, fallback: str
   }
   return fallback;
 }
+
+function toNumber(v: string) {
+  const normalized = v.includes(",") ? v.replace(/\./g, "").replace(",", ".") : v;
+  return Number(normalized.replace(/[^\d.-]/g, ""));
+}
+
+/** A required number written with comma or dot decimals, within bounds. */
+export const numberIn = (label: string, min: number, max = Infinity) =>
+  z
+    .string()
+    .trim()
+    .transform((v, ctx) => {
+      const n = v === "" ? NaN : toNumber(v);
+      if (!Number.isFinite(n) || n < min || n > max) {
+        const range = Number.isFinite(max) ? `entre ${min} e ${max}` : `a partir de ${min}`;
+        ctx.addIssue({ code: "custom", message: `${label}: informe um número ${range}.` });
+        return z.NEVER;
+      }
+      return n;
+    });
+
+/** An optional number; empty or zero means "not informed". */
+export const optionalPositive = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v, ctx) => {
+    if (!v) return null;
+    const n = toNumber(v);
+    if (!Number.isFinite(n) || n < 0) {
+      ctx.addIssue({ code: "custom", message: "Valor inválido" });
+      return z.NEVER;
+    }
+    return n > 0 ? n : null;
+  });

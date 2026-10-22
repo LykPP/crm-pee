@@ -13,6 +13,8 @@ export interface Issue {
   tone: "bad" | "warn";
   text: string;
   area: IssueArea;
+  /** Set for checks the prototype did not have. */
+  code?: "end_use_rcb";
 }
 
 export const NEXT_STEP_HINT: Record<Stage, string> = {
@@ -59,6 +61,17 @@ export function projectIssues(bundle: ProjectBundle, others: ProjectBundle[], to
     }
     if (k.typology && (k.peeTotal < k.typology.min || k.peeTotal > k.typology.max)) {
       out.push({ tone: "bad", text: `Valor PEE ${mi(k.peeTotal)} fora da faixa da tipologia`, area: "rcb" });
+    }
+    // The official workbook flags end uses above the limit even when the total passes.
+    if (k.rcbMax != null && k.rcbPee <= k.rcbMax && k.byEndUse.length > 1) {
+      for (const u of k.byEndUse.filter((x) => x.rcb > k.rcbMax!)) {
+        out.push({
+          tone: "warn",
+          text: `RCB de ${u.endUse} ${nf(u.rcb)} acima do limite ${nf(k.rcbMax)}`,
+          area: "rcb",
+          code: "end_use_rcb",
+        });
+      }
     }
   }
 

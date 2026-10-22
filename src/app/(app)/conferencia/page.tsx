@@ -14,35 +14,45 @@ import { requireMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Values the approved prototype shows for the example projects
- * (CLAUDE.md lists the first three; the fourth was computed with the
- * prototype's own code).
+ * Reference values for the example projects. The first three come from
+ * Cemig's official RCB workbook (scripts/check-official-rcb.py); the dairy
+ * project uses motors, which that workbook models with data the prototype
+ * does not hold, so its reference is the prototype plus the R$ 1.500 audit.
+ * Alerts are the prototype's, plus the per end use warnings of the workbook.
  */
-const PROTOTYPE: Record<string, { pee: number; rcb: number; alerts: string[] }> = {
+const REFERENCE: Record<string, { source: string; pee: number; rcb: number; alerts: string[] }> = {
   "Hospital São Lucas · LED e climatização": {
-    pee: 730107,
-    rcb: 0.534,
-    alerts: ["3 documento(s) fora da validade", "9 documento(s) faltando"],
+    source: "Planilha Cemig",
+    pee: 731607,
+    rcb: 0.535,
+    alerts: [
+      "3 documento(s) fora da validade",
+      "9 documento(s) faltando",
+      "RCB de Climatização 0,94 acima do limite 0,75",
+    ],
   },
   "Vale do Sereno · Iluminação pública LED": {
-    pee: 2704718,
-    rcb: 0.432,
+    source: "Planilha Cemig",
+    pee: 2706218,
+    rcb: 0.433,
     alerts: ["16 documento(s) faltando"],
   },
   "Escolas Polo Monte Claro · LED e climatização": {
-    pee: 636333,
-    rcb: 0.663,
-    alerts: ["1 documento(s) fora da validade"],
+    source: "Planilha Cemig",
+    pee: 637833,
+    rcb: 0.665,
+    alerts: ["1 documento(s) fora da validade", "RCB de Climatização 1,95 acima do limite 0,75"],
   },
   "Laticínios Serra Verde · motores e refrigeração": {
-    pee: 341169,
-    rcb: 0.608,
+    source: "Protótipo + auditoria",
+    pee: 342669,
+    rcb: 0.61,
     alerts: ["21 documento(s) faltando"],
   },
 };
 
 function Match({ ok }: { ok: boolean }) {
-  return <span className={`chip ${ok ? "ok" : "bad"}`}>{ok ? "Igual ao protótipo" : "Diferente"}</span>;
+  return <span className={`chip ${ok ? "ok" : "bad"}`}>{ok ? "Igual" : "Diferente"}</span>;
 }
 
 export default async function ConferencePage() {
@@ -56,7 +66,7 @@ export default async function ConferencePage() {
       <div className="head">
         <div>
           <h1>Conferência dos cálculos</h1>
-          <p>Os números do sistema novo ao lado dos valores do protótipo aprovado.</p>
+          <p>Os números do sistema ao lado da planilha oficial de RCB da Cemig.</p>
         </div>
         <Link href="/" className="btn">
           Voltar
@@ -67,6 +77,11 @@ export default async function ConferencePage() {
         A RCB calculada é uma estimativa (PROPEE, módulo 7). A planilha oficial da distribuidora
         prevalece.
       </p>
+      <p className="help">
+        Os três primeiros exemplos foram calculados na planilha oficial da Cemig (CPP 001/2026, rev.
+        01). O de motores usa o protótipo aprovado mais a auditoria de R$ 1.500 exigida pela
+        Especificação Técnica (item 5.16.1).
+      </p>
 
       {!bundles.length && (
         <div className="empty">
@@ -76,7 +91,7 @@ export default async function ConferencePage() {
       )}
 
       {bundles.map((b) => {
-        const ref = PROTOTYPE[b.project.name];
+        const ref = REFERENCE[b.project.name];
         const k = b.actions ? calcProject(b.project, b.call, b.actions, b.costs) : null;
         const docs = summarizeDocuments(documentRows(b.project, b.call, b.units, b.documents, today));
         const issues = projectIssues(b, bundles, today);
@@ -96,7 +111,7 @@ export default async function ConferencePage() {
                     <span className="v big num">{mi(k.peeTotal)}</span>
                     {ref && (
                       <span className="help">
-                        Protótipo: {mi(ref.pee)} <Match ok={peeOk} />
+                        {ref.source}: {mi(ref.pee)} <Match ok={peeOk} />
                       </span>
                     )}
                   </div>
@@ -108,7 +123,7 @@ export default async function ConferencePage() {
                     </span>
                     {ref && (
                       <span className="help">
-                        Protótipo: {nf(ref.rcb, 3)} <Match ok={rcbOk} />
+                        {ref.source}: {nf(ref.rcb, 3)} <Match ok={rcbOk} />
                       </span>
                     )}
                   </div>
@@ -147,7 +162,7 @@ export default async function ConferencePage() {
               )}
               {ref && (
                 <p className="help">
-                  Comparação com o protótipo: <Match ok={alertsOk} />
+                  Comparação com a referência: <Match ok={alertsOk} />
                 </p>
               )}
             </div>
