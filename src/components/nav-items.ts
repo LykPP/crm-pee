@@ -6,4 +6,5 @@ export const NAV_ITEMS = [
   { href: "/pipeline", label: "Pipeline", hint: "Visão por fase" },
   { href: "/calendario", label: "Calendário", hint: "Prazos e lembretes" },
   { href: "/distribuidoras", label: "Distribuidoras", hint: "Cemig, Light e outras" },
+  { href: "/equipe", label: "Equipe", hint: "Pessoas e permissões" },
 ] as const;

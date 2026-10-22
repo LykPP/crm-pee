@@ -281,6 +281,13 @@ a.item.news:hover .t { color: var(--accent); }
 .more-ev { font-size: 12px; color: var(--ink-3); }
 .legend .chip { font-weight: 500; }
 
+.field .label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.radio { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.radio:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.radio input { margin-top: 3px; width: auto; }
+.radio span { display: flex; flex-direction: column; gap: 2px; }
+.radio small { font-size: 12.5px; color: var(--ink-2); }
+
 .solo { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
 .solo .box { width: 100%; max-width: 400px; gap: 18px; }
 .solo form { display: flex; flex-direction: column; gap: 14px; }
