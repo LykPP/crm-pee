@@ -83,3 +83,24 @@ describe("members", () => {
   });
 });
 
+
+describe("deleting an organization", () => {
+  it("removes its data, memberships and history, leaving other organizations alone", async () => {
+    await asUser(db, ADMIN, async (tx) => {
+      const c = await tx.query<{ id: string }>("insert into clients (org_id, name) values ($1, 'X') returning id", [org]);
+      await tx.query("insert into projects (org_id, client_id, name) values ($1, $2, 'P')", [org, c.rows[0].id]);
+      await tx.query("insert into invitations (org_id, email, role) values ($1, 'z@z.com', 'viewer')", [org]);
+    });
+    await db.query("delete from organizations where id = $1", [org]);
+    const left = await db.query(
+      `select (select count(*) from clients where org_id = $1)::int as clients,
+              (select count(*) from projects where org_id = $1)::int as projects,
+              (select count(*) from audit_log where org_id = $1)::int as history,
+              (select count(*) from memberships where org_id = $1)::int as members,
+              (select count(*) from invitations where org_id = $1)::int as invitations,
+              (select count(*) from organizations)::int as organizations`,
+      [org],
+    );
+    expect(left.rows[0]).toEqual({ clients: 0, projects: 0, history: 0, members: 0, invitations: 0, organizations: 1 });
+  });
+});
