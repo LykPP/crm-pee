@@ -1,3 +1,4 @@
+import { DetailPane } from "@/components/detail-pane";
 import { CallFormDialog } from "./call-form";
 import { CallList } from "./call-list";
 import { createCall } from "./actions";
@@ -61,7 +62,7 @@ export default async function CallsLayout({ children }: { children: React.ReactN
             </div>
           </details>
         </div>
-        <div>{children}</div>
+        <DetailPane>{children}</DetailPane>
       </div>
     </>
   );

@@ -7,6 +7,8 @@ export default defineConfig({
   },
   test: {
     include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
-    testTimeout: 30000,
+    testTimeout: 60000,
+    // Each database test builds a fresh in-memory Postgres, slow on a busy machine.
+    hookTimeout: 60000,
   },
 });

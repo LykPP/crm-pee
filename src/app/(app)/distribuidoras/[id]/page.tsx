@@ -9,7 +9,7 @@ import {
   getUtility,
   listCalls,
   listInteractions,
-  listUtilityContacts,
+  listContacts,
   shortCallCode,
 } from "@/lib/data/reference";
 import { searchCallsUrl } from "@/lib/labels";
@@ -26,7 +26,7 @@ export default async function UtilityPage({ params }: { params: Promise<{ id: st
   if (!utility) notFound();
 
   const [contacts, interactions, calls] = await Promise.all([
-    listUtilityContacts(supabase, id),
+    listContacts(supabase, { column: "utility_id", id }),
     listInteractions(supabase, { column: "utility_id", id }),
     listCalls(supabase),
   ]);

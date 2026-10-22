@@ -112,12 +112,15 @@ export async function getUtility(supabase: Supabase, id: string) {
   return row as UtilityRow | null;
 }
 
-export async function listUtilityContacts(supabase: Supabase, utilityId: string) {
+export async function listContacts(
+  supabase: Supabase,
+  filter: { column: "utility_id" | "client_id"; id: string },
+) {
   const rows = must(
     await supabase
       .from("contacts")
       .select("id, name, job_title, email, phone, is_primary")
-      .eq("utility_id", utilityId)
+      .eq(filter.column, filter.id)
       .order("is_primary", { ascending: false })
       .order("name"),
     "contacts",

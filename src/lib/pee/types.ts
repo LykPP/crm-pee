@@ -68,6 +68,7 @@ export interface ProjectCosts {
 
 export interface Project {
   id: string;
+  client_id: string;
   name: string;
   call_id: string | null;
   typology: string | null;
@@ -80,6 +81,7 @@ export interface Project {
   is_heritage_listed: boolean;
   has_incentivized_source: boolean;
   requires_public_bidding: boolean;
+  is_example?: boolean;
 }
 
 /** A project with everything the rules need to evaluate it. */

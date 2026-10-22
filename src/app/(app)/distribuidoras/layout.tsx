@@ -1,3 +1,4 @@
+import { DetailPane } from "@/components/detail-pane";
 import { UtilityFormDialog } from "./utility-form";
 import { UtilityList } from "./utility-list";
 import { createUtility } from "./actions";
@@ -43,7 +44,7 @@ export default async function UtilitiesLayout({ children }: { children: React.Re
             </div>
           )}
         </div>
-        <div>{children}</div>
+        <DetailPane>{children}</DetailPane>
       </div>
     </>
   );

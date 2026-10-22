@@ -31,7 +31,7 @@ export async function loadProjectBundles(supabase: Supabase, role: MemberRole): 
     seeCosts ? supabase.from("project_costs").select("*") : null,
   ]);
 
-  const projectRows = must(projects, "projects") as (Project & { call_id: string | null })[];
+  const projectRows = must(projects, "projects") as Project[];
   const callIds = [...new Set(projectRows.map((p) => p.call_id).filter((id): id is string => !!id))];
   const callRows = callIds.length
     ? must(
