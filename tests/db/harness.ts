@@ -33,3 +33,20 @@ export async function asUser<T>(db: PGlite, userId: string, fn: (tx: PGlite) => 
     throw err;
   }
 }
+
+/** Adds a person to an organization directly, bypassing permissions. */
+export async function addMember(db: PGlite, orgId: string, userId: string, role: string) {
+  await db.query("insert into memberships (org_id, user_id, role) values ($1, $2, $3)", [
+    orgId,
+    userId,
+    role,
+  ]);
+}
+
+/** Creates an organization through the public function, as that user. */
+export async function createOrgAs(db: PGlite, userId: string, name: string) {
+  const res = await asUser(db, userId, (tx) =>
+    tx.query<{ id: string }>("select public.create_organization($1) as id", [name]),
+  );
+  return res.rows[0].id;
+}
