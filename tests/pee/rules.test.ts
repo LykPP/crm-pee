@@ -5,6 +5,7 @@ import {
   calcProject,
   daysBetween,
   documentStatus,
+  executionSteps,
   projectIssues,
   todayInBrazil,
 } from "@/lib/pee";
@@ -156,5 +157,13 @@ describe("limits and RCB", () => {
     const b = exampleBundles();
     const x = { ...structuredClone(b.p1), actions: undefined, costs: undefined };
     expect(projectIssues(x, [], "2026-10-22").every((i) => i.area !== "rcb")).toBe(true);
+  });
+});
+
+describe("execution steps", () => {
+  it("adds the bidding step only for public clients that must bid", () => {
+    expect(executionSteps({ requires_public_bidding: false }).map(([k]) => k)).not.toContain("licitacao");
+    expect(executionSteps({ requires_public_bidding: true }).at(-1)?.[0]).toBe("licitacao");
+    expect(executionSteps({ requires_public_bidding: false })).toHaveLength(9);
   });
 });

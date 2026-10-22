@@ -10,10 +10,11 @@ import { StageSelect } from "../stage-select";
 import { deleteProject, setFolder, setStage, updateProject } from "../actions";
 import { DocumentsTab } from "./documents-tab";
 import { UnitsSection } from "./units";
+import { ExecutionTab } from "./execution-tab";
 import { ViabilityTab } from "./viability-tab";
 import { listClients } from "@/lib/data/clients";
 import { projectFormOptions } from "@/lib/data/project-options";
-import { CAN_SEE_COSTS, loadProjectBundles } from "@/lib/data/projects";
+import { CAN_SEE_COSTS, listExecutionSteps, loadProjectBundles } from "@/lib/data/projects";
 import { listCalls, listContacts, listInteractions, shortCallCode } from "@/lib/data/reference";
 import { MODALITY_LABELS, clientMessage } from "@/lib/messages";
 import {
@@ -48,9 +49,6 @@ const TAB_FOR_AREA: Record<IssueArea, Tab> = {
   conflicts: "visao",
 };
 
-const COMING: Record<Exclude<Tab, "visao" | "documentos" | "viabilidade">, string> = {
-  execucao: "etapa 10",
-};
 
 export default async function ProjectPage({
   params,
@@ -75,9 +73,10 @@ export default async function ProjectPage({
   const { project: p } = bundle;
   const client = clients.find((c) => c.id === p.client_id);
   const call = calls.find((c) => c.id === p.call_id);
-  const [interactions, contacts] = await Promise.all([
+  const [interactions, contacts, steps] = await Promise.all([
     listInteractions(supabase, { column: "client_id", id: p.client_id }),
     listContacts(supabase, { column: "client_id", id: p.client_id }),
+    tab === "execucao" ? listExecutionSteps(supabase, id) : Promise.resolve([]),
   ]);
   const contact = contacts.find((c) => c.is_primary) ?? contacts[0];
   const today = todayInBrazil();
@@ -238,10 +237,13 @@ export default async function ProjectPage({
             <p className="help">O seu papel não permite ver custos e ações de eficiência.</p>
           </div>
         )
-      ) : tab !== "visao" ? (
-        <div className="box">
-          <p className="help">Esta aba ainda está em construção. Previsão: {COMING[tab]} do plano da Fase 1.</p>
-        </div>
+      ) : tab === "execucao" ? (
+        <ExecutionTab
+          project={p}
+          steps={steps}
+          rules={bundle.call?.rules ?? null}
+          canEdit={canEditDetails}
+        />
       ) : (
         <>
           {issues.length > 0 && (

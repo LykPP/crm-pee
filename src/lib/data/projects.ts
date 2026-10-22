@@ -4,6 +4,7 @@ import type {
   Call,
   ConsumerUnit,
   EfficiencyAction,
+  ExecutionStep,
   Project,
   ProjectBundle,
   ProjectCosts,
@@ -61,4 +62,15 @@ export async function loadProjectBundles(supabase: Supabase, role: MemberRole): 
     actions: actionRows?.filter((a) => a.project_id === project.id),
     costs: costRows ? (costRows.find((c) => c.project_id === project.id) ?? null) : undefined,
   }));
+}
+
+export async function listExecutionSteps(supabase: Supabase, projectId: string) {
+  const rows = must(
+    await supabase
+      .from("execution_steps")
+      .select("step_key, status, started_on, finished_on")
+      .eq("project_id", projectId),
+    "execution steps",
+  );
+  return rows as ExecutionStep[];
 }

@@ -16,7 +16,7 @@ import {
   requiredText,
   type FormState,
 } from "@/lib/forms";
-import { COST_FIELDS, END_USES, STAGES } from "@/lib/pee";
+import { COST_FIELDS, END_USES, EXECUTION_STEPS, STAGES } from "@/lib/pee";
 import { requireMembership, type MemberRole } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -279,5 +279,42 @@ export async function saveCosts(projectId: string, _prev: FormState, form: FormD
     ? await ctx.supabase.from("project_costs").update(data).eq("id", found.data.id)
     : await ctx.supabase.from("project_costs").insert({ ...data, org_id: ctx.org.id, project_id: projectId });
   if (res.error) return { error: dbError(res.error, "Não foi possível salvar os custos.") };
+  return done(projectId);
+}
+
+const stepSchema = z
+  .object({
+    status: z.enum(["todo", "in_progress", "done"]),
+    started_on: optionalDate,
+    finished_on: optionalDate,
+  })
+  .refine((s) => !s.started_on || !s.finished_on || s.finished_on >= s.started_on, {
+    message: "O fim não pode ser anterior ao início.",
+  });
+
+export async function saveStep(
+  projectId: string,
+  stepKey: string,
+  _prev: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await context(DETAIL_EDITORS);
+  if (!ctx) return DENIED;
+  if (!EXECUTION_STEPS.some(([key]) => key === stepKey)) return { error: "Etapa inválida." };
+  const { data, error } = parseForm(stepSchema, form);
+  if (!data) return { error };
+  const found = await ctx.supabase
+    .from("execution_steps")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("step_key", stepKey)
+    .maybeSingle();
+  if (found.error) return { error: dbError(found.error, "Não foi possível salvar a etapa.") };
+  const res = found.data
+    ? await ctx.supabase.from("execution_steps").update(data).eq("id", found.data.id)
+    : await ctx.supabase
+        .from("execution_steps")
+        .insert({ ...data, org_id: ctx.org.id, project_id: projectId, step_key: stepKey });
+  if (res.error) return { error: dbError(res.error, "Não foi possível salvar a etapa.") };
   return done(projectId);
 }
