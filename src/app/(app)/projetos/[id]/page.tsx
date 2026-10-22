@@ -3,16 +3,18 @@ import { notFound } from "next/navigation";
 import { ActionButton } from "@/components/action-button";
 import { FormDialog } from "@/components/form-dialog";
 import { NextActionFact } from "@/components/next-action";
+import { TabsNav } from "@/components/tabs-nav";
 import { InteractionDialog, Timeline } from "@/components/people";
 import { ProjectFormDialog } from "../project-form";
 import { StageSelect } from "../stage-select";
 import { deleteProject, setFolder, setStage, updateProject } from "../actions";
+import { DocumentsTab } from "./documents-tab";
 import { UnitsSection } from "./units";
 import { listClients } from "@/lib/data/clients";
 import { projectFormOptions } from "@/lib/data/project-options";
 import { CAN_SEE_COSTS, loadProjectBundles } from "@/lib/data/projects";
-import { listCalls, listInteractions, shortCallCode } from "@/lib/data/reference";
-import { MODALITY_LABELS } from "@/lib/messages";
+import { listCalls, listContacts, listInteractions, shortCallCode } from "@/lib/data/reference";
+import { MODALITY_LABELS, clientMessage } from "@/lib/messages";
 import {
   PHASES,
   calcProject,
@@ -45,8 +47,7 @@ const TAB_FOR_AREA: Record<IssueArea, Tab> = {
   conflicts: "visao",
 };
 
-const COMING: Record<Exclude<Tab, "visao">, string> = {
-  documentos: "etapa 8",
+const COMING: Record<Exclude<Tab, "visao" | "documentos">, string> = {
   viabilidade: "etapa 9",
   execucao: "etapa 10",
 };
@@ -56,10 +57,10 @@ export default async function ProjectPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ aba?: string }>;
+  searchParams: Promise<{ aba?: string; filtro?: string }>;
 }) {
   const { id } = await params;
-  const { aba } = await searchParams;
+  const { aba, filtro } = await searchParams;
   const tab: Tab = TABS.some(([t]) => t === aba) ? (aba as Tab) : "visao";
   const { role } = await requireMembership();
   const supabase = await createClient();
@@ -74,13 +75,18 @@ export default async function ProjectPage({
   const { project: p } = bundle;
   const client = clients.find((c) => c.id === p.client_id);
   const call = calls.find((c) => c.id === p.call_id);
-  const interactions = await listInteractions(supabase, { column: "client_id", id: p.client_id });
+  const [interactions, contacts] = await Promise.all([
+    listInteractions(supabase, { column: "client_id", id: p.client_id }),
+    listContacts(supabase, { column: "client_id", id: p.client_id }),
+  ]);
+  const contact = contacts.find((c) => c.is_primary) ?? contacts[0];
   const today = todayInBrazil();
   const href = (t: Tab) => `/projetos/${id}${t === "visao" ? "" : `?aba=${t}`}`;
 
   const canEdit = role !== "viewer";
   const canEditDetails = CAN_SEE_COSTS.includes(role);
-  const docs = summarizeDocuments(documentRows(p, bundle.call, bundle.units, bundle.documents, today));
+  const docRows = documentRows(p, bundle.call, bundle.units, bundle.documents, today);
+  const docs = summarizeDocuments(docRows);
   const issues = projectIssues(bundle, bundles, today);
   const next = nextStep(bundle, bundles, today);
   const verdict = feasibility(bundle);
@@ -132,7 +138,7 @@ export default async function ProjectPage({
             {next.more > 0 && <div className="small">e mais {next.more} problema(s) para resolver</div>}
           </div>
           {next.area && (
-            <Link className="btn pri" href={href(TAB_FOR_AREA[next.area])}>
+            <Link className="btn pri" href={href(TAB_FOR_AREA[next.area])} scroll={false}>
               Resolver
             </Link>
           )}
@@ -140,7 +146,7 @@ export default async function ProjectPage({
       )}
 
       <div className="tiles">
-        <Link className="tile" href={href("documentos")}>
+        <Link className="tile" href={href("documentos")} scroll={false}>
           <span className="l">Documentos</span>
           <span className="v">
             {docs.ok} de {docs.total}
@@ -156,7 +162,7 @@ export default async function ProjectPage({
         </Link>
         {k ? (
           <>
-            <Link className="tile" href={href("viabilidade")}>
+            <Link className="tile" href={href("viabilidade")} scroll={false}>
               <span className="l">Viabilidade</span>
               <span
                 className="v"
@@ -170,7 +176,7 @@ export default async function ProjectPage({
                   : "cadastre as ações"}
               </span>
             </Link>
-            <Link className="tile" href={href("viabilidade")}>
+            <Link className="tile" href={href("viabilidade")} scroll={false}>
               <span className="l">Investimento do PEE</span>
               <span className="v">{hasActions ? mi(k.peeTotal) : "—"}</span>
               <span className="s">
@@ -186,15 +192,39 @@ export default async function ProjectPage({
         )}
       </div>
 
-      <nav className="tabs" aria-label="Seções do projeto">
-        {TABS.map(([t, label]) => (
-          <Link key={t} href={href(t)} aria-current={tab === t ? "page" : undefined}>
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <TabsNav
+        label="Seções do projeto"
+        current={tab}
+        tabs={TABS.map(([t, label]) => ({ key: t, label, href: href(t) }))}
+      />
 
-      {tab !== "visao" ? (
+      {tab === "documentos" ? (
+        <DocumentsTab
+          projectId={id}
+          rows={docRows}
+          hasChecklist={Boolean(bundle.call?.rules.checklist)}
+          deadline={bundle.call?.submission_deadline ?? null}
+          showAll={filtro === "todos"}
+          canEdit={canEditDetails}
+          contact={contact}
+          message={clientMessage("documents", {
+            client: {
+              name: client?.name ?? "",
+              municipality: client?.municipality ?? null,
+              typology: client?.typology ?? null,
+              modality: client?.modality ?? null,
+            },
+            contactName: contact?.name,
+            project: bundle,
+            call: call && {
+              code: call.code,
+              submission_deadline: call.submission_deadline,
+              utilityName: call.utility?.name ?? null,
+            },
+            today,
+          })}
+        />
+      ) : tab !== "visao" ? (
         <div className="box">
           <p className="help">Esta aba ainda está em construção. Previsão: {COMING[tab]} do plano da Fase 1.</p>
         </div>
@@ -209,7 +239,7 @@ export default async function ProjectPage({
                     <span className={`dot ${i.tone}`} />
                     <div className="grow t">{i.text}</div>
                     {TAB_FOR_AREA[i.area] !== "visao" && (
-                      <Link className="btn sm" href={href(TAB_FOR_AREA[i.area])}>
+                      <Link className="btn sm" href={href(TAB_FOR_AREA[i.area])} scroll={false}>
                         Ver
                       </Link>
                     )}

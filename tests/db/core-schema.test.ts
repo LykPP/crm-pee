@@ -298,3 +298,27 @@ describe("audit log", () => {
     ]);
   });
 });
+
+describe("project documents", () => {
+  it("keeps one record per checklist item and consumer unit", async () => {
+    const client = await newClient(ADMIN_A, orgA);
+    const project = await newProject(ADMIN_A, orgA, client);
+    const unit = (
+      await one<{ id: string }>(
+        ADMIN_A,
+        "insert into consumer_units (org_id, project_id, number) values ($1, $2, '3001') returning id",
+        [orgA, project],
+      )
+    ).id;
+    const insert = (unitId: string | null) =>
+      one(
+        TECH_A,
+        "insert into project_documents (org_id, project_id, item_key, consumer_unit_id) values ($1, $2, 'fatura', $3)",
+        [orgA, project, unitId],
+      );
+    await insert(null);
+    await insert(unit);
+    await expect(insert(null)).rejects.toThrow(/duplicate key/);
+    await expect(insert(unit)).rejects.toThrow(/duplicate key/);
+  });
+});

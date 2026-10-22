@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useId, type ReactNode } from "react";
+import { startTransition, useActionState, useEffect, useId, type ReactNode } from "react";
 import type { FormState } from "@/lib/forms";
 import { Dialog } from "./dialog";
 
@@ -28,7 +28,17 @@ function Body({
   return (
     // The footer sits outside the form so extra buttons may carry their own forms.
     <div className="dlg-form">
-      <form id={formId} action={formAction} className="body">
+      <form
+        id={formId}
+        className="body"
+        // Submitting by hand keeps what was typed when the server returns an
+        // error; React resets forms that use the action prop.
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          startTransition(() => formAction(data));
+        }}
+      >
         {children}
         {state.error && (
           <p className="msg bad" role="alert">

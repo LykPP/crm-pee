@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { startTransition, useActionState } from "react";
 import type { FormState } from "@/lib/forms";
 import { STAGES, STAGE_LABELS, type Stage } from "@/lib/pee";
 
@@ -15,9 +15,8 @@ export function StageSelect({
   disabled?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, {});
-  const ref = useRef<HTMLFormElement>(null);
   return (
-    <form ref={ref} action={formAction} className="row">
+    <form className="row" onSubmit={(e) => e.preventDefault()}>
       <label className="small muted" htmlFor="stage">
         Etapa
       </label>
@@ -27,7 +26,11 @@ export function StageSelect({
         className="btn"
         defaultValue={stage}
         disabled={disabled || pending}
-        onChange={() => ref.current?.requestSubmit()}
+        onChange={(e) => {
+          const data = new FormData();
+          data.set("stage", e.target.value);
+          startTransition(() => formAction(data));
+        }}
       >
         {STAGES.map((s) => (
           <option key={s} value={s}>

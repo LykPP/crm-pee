@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { createOrganization, type CreateOrgState } from "./actions";
 
 export function OrgForm() {
@@ -9,7 +9,14 @@ export function OrgForm() {
     {},
   );
   return (
-    <form action={action}>
+    <form
+      // Submitting by hand keeps the typed value when the server returns an error.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => action(data));
+      }}
+    >
       <div className="field">
         <label htmlFor="name">Nome da ESCO</label>
         <input id="name" name="name" required minLength={2} maxLength={120} />

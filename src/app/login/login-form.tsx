@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { sendLoginLink, type LoginState } from "./actions";
 
 export function LoginForm({ linkError }: { linkError: boolean }) {
@@ -18,7 +18,14 @@ export function LoginForm({ linkError }: { linkError: boolean }) {
   }
 
   return (
-    <form action={action}>
+    <form
+      // Submitting by hand keeps the typed value when the server returns an error.
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => action(data));
+      }}
+    >
       {linkError && state.status === "idle" && (
         <div className="msg bad" role="alert">
           Esse link não vale mais. Peça um novo abaixo.

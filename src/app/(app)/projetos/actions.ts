@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   checkbox,
   dbError,
+  optionalDate,
   optionalText,
   optionalUrl,
   parseForm,
@@ -154,5 +155,52 @@ export async function deleteUnit(projectId: string, unitId: string): Promise<For
   if (!ctx) return DENIED;
   const res = await ctx.supabase.from("consumer_units").delete().eq("id", unitId);
   if (res.error) return { error: dbError(res.error, "Não foi possível remover a UC.") };
+  return done(projectId);
+}
+
+const documentSchema = z
+  .object({
+    status: z.enum(["pending", "ok", "na"]),
+    file_path: optionalText,
+    issued_on: optionalDate,
+    valid_until: optionalDate,
+    notes: optionalText,
+  })
+  .refine((d) => !d.issued_on || !d.valid_until || d.valid_until >= d.issued_on, {
+    message: "A validade não pode ser anterior à emissão.",
+  });
+
+/** Records the status, file and dates of one checklist item (per unit when scoped). */
+export async function saveDocument(
+  projectId: string,
+  itemKey: string,
+  unitId: string | null,
+  _prev: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await context(DETAIL_EDITORS);
+  if (!ctx) return DENIED;
+  const { data, error } = parseForm(documentSchema, form);
+  if (!data) return { error };
+
+  let existing = ctx.supabase
+    .from("project_documents")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("item_key", itemKey);
+  existing = unitId ? existing.eq("consumer_unit_id", unitId) : existing.is("consumer_unit_id", null);
+  const found = await existing.maybeSingle();
+  if (found.error) return { error: dbError(found.error, "Não foi possível salvar o documento.") };
+
+  const res = found.data
+    ? await ctx.supabase.from("project_documents").update(data).eq("id", found.data.id)
+    : await ctx.supabase.from("project_documents").insert({
+        ...data,
+        org_id: ctx.org.id,
+        project_id: projectId,
+        item_key: itemKey,
+        consumer_unit_id: unitId,
+      });
+  if (res.error) return { error: dbError(res.error, "Não foi possível salvar o documento.") };
   return done(projectId);
 }

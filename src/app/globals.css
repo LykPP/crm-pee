@@ -210,6 +210,13 @@ a.tile:hover { border-color: var(--line-2); background: var(--soft); }
 .task .s { color: var(--ink-2); font-size: 13.5px; }
 .folder { font-family: var(--f-mono); font-size: 12.5px; line-height: 1.7; background: var(--soft); border-radius: 8px; padding: 12px 14px; white-space: pre; overflow-x: auto; }
 
+.seg .segbtn { border: 1px solid var(--line-2); border-radius: 999px; background: var(--surface); padding: 5px 12px; font-size: 13.5px; color: var(--ink-2); white-space: nowrap; text-decoration: none; }
+.seg .segbtn[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.docrow { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.docrow:first-child { border-top: 0; }
+.docrow .grow { flex: 1; min-width: 220px; }
+.docrow .s { font-size: 13px; color: var(--ink-3); overflow-wrap: anywhere; }
+
 .solo { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 32px 16px; }
 .solo .box { width: 100%; max-width: 400px; gap: 18px; }
 .solo form { display: flex; flex-direction: column; gap: 14px; }
