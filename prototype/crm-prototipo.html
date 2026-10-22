@@ -1,0 +1,693 @@
+<title>Painel PEE da ESCO</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: tela branca e arejada. Menu à esquerda, cada tela mostra primeiro o essencial e guarda os detalhes em seções que abrem. Tema claro único, por escolha. */
+:root{
+  color-scheme:light;
+  --bg:#ffffff; --surface:#ffffff; --soft:#f6f8f7; --line:#e4e9e7; --line-2:#d2dad7;
+  --ink:#17221f; --ink-2:#55635e; --ink-3:#8a9792;
+  --accent:#0d6b65; --accent-ink:#ffffff; --accent-soft:#e6f3f1; --copper:#b0552b; --copper-soft:#fbeee6;
+  --ok:#2e7d32; --ok-soft:#e8f4e8; --warn:#9a6200; --warn-soft:#fdf3dd; --bad:#b3261e; --bad-soft:#fbe9e7;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:30px;line-height:1.1} h2{font-size:22px} h3{font-size:18px}
+h4{font-family:var(--f-body);font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100%}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:24px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:22px}
+.brand{padding:0 10px;display:flex;flex-direction:column;gap:2px}
+.brand b{font-family:var(--f-display);font-size:22px;white-space:nowrap}
+.brand span{font-size:12.5px;color:var(--ink-3)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;flex-direction:column;padding:9px 12px;border-radius:8px;color:var(--ink-2)}
+.nav button b{font-weight:600;font-size:15px}
+.nav button small{font-size:12px;color:var(--ink-3)}
+.nav button:hover{background:var(--soft);color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.nav button[aria-current="page"] small{color:var(--accent)}
+.side .foot{margin-top:auto;font-size:12px;color:var(--ink-3);padding:0 10px}
+.main{min-width:0;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px}
+.head p{margin-top:6px;color:var(--ink-2)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{cursor:pointer;border:1px solid var(--line-2);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:500;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--ink);font-size:14px}
+.btn:hover{border-color:var(--ink-3);background:var(--soft)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.pri:hover{background:#0a5651}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn.danger{color:var(--bad)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.sec{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.hero{display:flex;flex-wrap:wrap;gap:20px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:20px 24px;background:var(--surface)}
+.hero .d{font-family:var(--f-display);font-size:56px;font-weight:700;line-height:.9;color:var(--copper)}
+.hero .t{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.hero .t b{font-family:var(--f-display);font-size:21px;font-weight:600}
+.hero .t span{color:var(--ink-2)}
+.tasks{display:flex;flex-direction:column}
+.task{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0;padding-top:4px}
+.task .dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--accent)}
+.task .dot.bad{background:var(--bad)} .task .dot.warn{background:var(--warn)}
+.task .grow{flex:1;min-width:0}
+.task .t{font-weight:600}
+.task .s{color:var(--ink-2);font-size:13.5px}
+.pcard{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--surface);min-width:0}
+.pcard:hover{border-color:var(--line-2);box-shadow:0 2px 10px rgba(20,40,35,.06)}
+.pcard .t{font-weight:600;font-size:16px}
+.pcard .s{color:var(--ink-2);font-size:13.5px}
+.pcard .meta{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--ink-2)}
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.steps i.on{background:var(--accent)}
+.steps i.lost{background:var(--ink-3)}
+.stepper{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.stepper div{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-3)}
+.stepper div i{height:6px;border-radius:3px;background:var(--line)}
+.stepper div.done{color:var(--ink-2)} .stepper div.done i{background:var(--accent)}
+.stepper div.cur{color:var(--accent);font-weight:600} .stepper div.cur i{background:var(--accent)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--soft);color:var(--ink-2);white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.acc{background:var(--accent-soft);color:var(--accent)}
+.chip.ex{background:transparent;border:1px dashed var(--line-2);color:var(--ink-3);font-weight:500}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .ok{background:var(--ok)} .bar .bad{background:var(--bad)}
+.next{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border-radius:var(--r);padding:16px 20px}
+.next .grow{flex:1;min-width:220px}
+.next .l{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:600}
+.next .t{font-weight:600;font-size:16px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tile{border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.tile .l{font-size:12.5px;color:var(--ink-2)}
+.tile .v{font-family:var(--f-display);font-size:28px;font-weight:600;line-height:1.05}
+.tile .s{font-size:13px;color:var(--ink-3)}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;padding:10px 14px;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--ink-3);font-weight:600;background:var(--soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.split{display:grid;grid-template-columns:minmax(250px,320px) minmax(0,1fr);gap:24px;align-items:start}
+.cards{display:flex;flex-direction:column;gap:6px}
+.card{all:unset;box-sizing:border-box;cursor:pointer;border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0;border:1px solid transparent}
+.card:hover{background:var(--soft)}
+.card[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent-soft)}
+.card .t{font-weight:600}
+.card .s{font-size:13px;color:var(--ink-2)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 22px}
+.fact{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fact .l{font-size:12.5px;color:var(--ink-3)}
+.fact .v{font-weight:500;overflow-wrap:anywhere}
+details.more{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+details.more>summary{cursor:pointer;list-style:none;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:600}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:"+";font-family:var(--f-mono);color:var(--ink-3);font-size:18px}
+details.more[open]>summary::after{content:"−"}
+details.more>summary small{font-weight:400;color:var(--ink-3);margin-left:8px}
+details.more>.in{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
+.list{display:flex;flex-direction:column}
+.item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);min-width:0}
+.item:first-child{border-top:0}
+.item .grow{flex:1;min-width:0}
+.item .t{font-weight:600}
+.item .s{color:var(--ink-2);font-size:13.5px}
+.docrow{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.docrow:first-child{border-top:0}
+.docrow .grow{flex:1;min-width:220px}
+.docrow .s{font-size:13px;color:var(--ink-3);overflow-wrap:anywhere}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;padding:6px 12px;font-size:13.5px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.kanban{display:grid;grid-template-columns:repeat(5,minmax(210px,1fr));gap:14px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--soft);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-height:160px}
+.col h3{display:flex;justify-content:space-between;font-size:16px}
+.col .hint{font-size:12.5px;color:var(--ink-3);margin-top:-6px}
+.kcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.kcard .t{font-weight:600;cursor:pointer}
+.kcard select{font-size:13px;padding:4px 6px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface)}
+.muted{color:var(--ink-3)}
+.small{font-size:13px}
+.empty{padding:28px;text-align:center;color:var(--ink-2);border:1px dashed var(--line-2);border-radius:var(--r);display:flex;flex-direction:column;gap:8px;align-items:center}
+.banner{padding:12px 16px;border-radius:8px;background:var(--warn-soft);font-size:14px}
+.guide{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;position:relative}
+.guide div{display:flex;flex-direction:column;gap:4px}
+.guide b{font-size:14px}
+.guide span{font-size:13px;color:var(--ink-2)}
+.guide em{font-style:normal;font-family:var(--f-display);font-size:22px;color:var(--accent);font-weight:700;line-height:1}
+.guide .x{position:absolute;top:8px;right:8px}
+.copyable{display:inline-flex;font-family:var(--f-mono);font-size:13px;background:var(--soft);padding:2px 8px;border-radius:6px;overflow-wrap:anywhere}
+.tl .ev{display:grid;grid-template-columns:90px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.tl .ev:first-child{border-top:0}
+.tl .ev .d{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3)}
+.search{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:9px 12px;min-width:0;flex:1 1 220px}
+.verdict{display:flex;gap:18px;align-items:center;flex-wrap:wrap;border-radius:var(--r);padding:18px 20px}
+.verdict.ok{background:var(--ok-soft)} .verdict.bad{background:var(--bad-soft)} .verdict.na{background:var(--soft)}
+.verdict .big{font-family:var(--f-display);font-size:48px;font-weight:700;line-height:1}
+.verdict.ok .big{color:var(--ok)} .verdict.bad .big{color:var(--bad)}
+.verdict .grow{flex:1;min-width:220px;display:flex;flex-direction:column;gap:4px}
+.verdict .grow b{font-size:16px}
+.gauge{position:relative;height:8px;background:var(--line);border-radius:4px;margin-top:6px}
+.gauge .fill{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.gauge b{position:absolute;top:-4px;width:2px;height:16px;background:var(--ink)}
+dialog{border:0;border-radius:14px;background:var(--surface);color:var(--ink);padding:0;width:min(620px,calc(100vw - 32px));max-height:calc(100vh - 48px);box-shadow:0 20px 60px rgba(10,30,25,.2)}
+dialog::backdrop{background:rgba(20,34,31,.35)}
+.dlg{display:flex;flex-direction:column;max-height:calc(100vh - 50px)}
+.dlg header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.dlg .body{padding:18px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.dlg footer{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:13px;font-weight:600;color:var(--ink-2)}
+.field input,.field select,.field textarea{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:8px 10px;width:100%}
+.field textarea{min-height:90px;resize:vertical}
+.field .hint{font-size:12px;color:var(--ink-3)}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));right:max(18px,env(safe-area-inset-right,0px));background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:50;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+.folder{font-family:var(--f-mono);font-size:12.5px;line-height:1.7;background:var(--soft);border-radius:8px;padding:12px 14px;white-space:pre;overflow-x:auto}
+.help{font-size:13px;color:var(--ink-3)}
+@media (max-width:980px){.split{grid-template-columns:1fr}.tiles{grid-template-columns:1fr}.guide{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;padding:8px max(12px,env(safe-area-inset-left,0px));gap:10px;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+  .brand span,.side .foot,.nav button small{display:none}
+  .nav{flex-direction:row}
+  .grid2,.fgrid,.guide{grid-template-columns:1fr}
+  .stepper div span{display:none}
+  .stepper div.cur span{display:block}
+  h1{font-size:25px}
+  .hero .d{font-size:44px}
+}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><b>Painel PEE</b><span>CRM da ESCO</span></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="foot" id="foot"></div>
+  </aside>
+  <main class="main"><div class="wrap" id="view"></div></main>
+</div>
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+
+/* ---------- utilidades ---------- */
+const $=s=>document.querySelector(s);
+const h=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BRL=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const brl=n=>isFinite(n)?BRL.format(n):'—';
+const nf=(n,d=2)=>isFinite(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const mi=n=>!isFinite(n)?'—':n>=1e6?'R$ '+nf(n/1e6,1)+' mi':n>=1e3?'R$ '+nf(n/1e3,0)+' mil':brl(n);
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fd=iso=>iso?new Date(iso+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+const days=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
+const addM=(iso,m)=>{const d=new Date(iso+'T12:00:00');d.setMonth(d.getMonth()+m);return d.toISOString().slice(0,10)};
+const addD=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const byName=(a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR');
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>e.classList.remove('on'),2400)}
+async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg||'Copiado')}catch(e){toast('Selecione o texto e copie manualmente')}}
+
+const STAGES=[['prospeccao','Prospecção'],['visita','Visita técnica'],['documentacao','Documentação'],['diagnostico','Diagnóstico e RCB'],['pronto','Pronto para submeter'],['submetido','Submetido'],['aprovado','Aprovado'],['execucao','Em execução'],['mv','M&V e relatório'],['concluido','Concluído'],['perdido','Não aprovado']];
+const STAGE=Object.fromEntries(STAGES);
+const PREP=['prospeccao','visita','documentacao','diagnostico','pronto'];
+const CLI_ST=[['lead','Lead'],['qualificado','Qualificado'],['ativo','Com projeto'],['inativo','Inativo']];
+const CLI=Object.fromEntries(CLI_ST);
+const MOD={fp:'Fundo Perdido',cd:'Contrato de Desempenho'};
+const USOS=['Iluminação','Climatização','Motores','Refrigeração','Aquecimento solar','Fonte incentivada (FV)','Armazenamento (SAE)','Outros'];
+const ETAPAS=[['diag','Diagnóstico energético'],['linhaBase','Medição de linha de base e Plano de M&V'],['aquisicao','Aquisição de materiais e equipamentos'],['execucao','Execução das ações de eficiência'],['descarte','Descarte dos equipamentos substituídos'],['marketing','Ações de marketing'],['treinamento','Treinamento e capacitação'],['mvPos','Medição pós-retrofit e Relatório de M&V'],['relatorio','Avaliação de resultados e Relatório final'],['licitacao','Licitação (se houver)']];
+const INT_T=['Ligação','E-mail','WhatsApp','Visita','Reunião','Outro'];
+
+/* ---------- estado ---------- */
+const COLS=['editais','distribuidoras','clientes','projetos','interacoes'];
+const S={db:null,ready:false,ro:false,view:'painel',sel:{},ptab:'resumo',cfilter:'todos',q:'',dfilter:'pend'};
+COLS.forEach(c=>{S[c]={};S['l_'+c]=false});
+const arr=c=>Object.values(S[c]);
+
+/* ---------- regras do edital ---------- */
+function applies(it,p){const f=p.flags||{};switch(it.aplica){case'fp':return p.modalidade==='fp';case'cd':return p.modalidade==='cd';case'cd_me':return p.modalidade==='cd'&&f.meEpp;case'naoRemovivel':return p.modalidade==='fp'&&f.naoRemovivel;case'tombado':return!!f.tombado;case'fonteIncentivada':return!!f.fonteIncentivada;default:return true}}
+function docRows(p,e){
+  const out=[];if(!e||!e.checklist)return out;
+  const ucs=(p.ucs&&p.ucs.length)?p.ucs:[{id:'geral',numero:'UC',descricao:'(cadastre as UCs)'}];
+  for(const it of e.checklist){
+    if(!applies(it,p))continue;
+    const keys=it.escopo==='uc'?ucs.map(u=>({key:it.id+'__'+u.id,uc:u})):[{key:it.id,uc:null}];
+    for(const k of keys){const rec=(p.docs||{})[k.key]||{};out.push({it,uc:k.uc,key:k.key,rec,st:docStatus(it,rec,e)})}
+  }
+  return out;
+}
+function docStatus(it,rec,e){
+  if(rec.status==='na')return{c:'',t:'Não se aplica',k:'na'};
+  if(rec.status!=='ok')return it.opcional?{c:'',t:'Opcional',k:'opc'}:{c:'bad',t:'Falta',k:'falta'};
+  const prazo=e.prazoSubmissao||todayISO();
+  const v=it.validade;
+  if(v==='certidao'){if(!rec.validade)return{c:'warn',t:'Sem validade',k:'semdata'};if(rec.validade<prazo)return{c:'bad',t:'Vence antes do prazo',k:'vencido'};if(days(prazo,rec.validade)<15)return{c:'warn',t:'Vence logo após o prazo',k:'ok'};}
+  if(v==='fatura3m'){if(!rec.emissao)return{c:'warn',t:'Sem data',k:'semdata'};if(rec.emissao<addM(prazo,-3))return{c:'bad',t:'Fatura antiga (>3 meses)',k:'vencido'};}
+  if(v==='orcamento3m'){if(!rec.emissao)return{c:'warn',t:'Sem data',k:'semdata'};if(rec.emissao<addM(e.publicacao||prazo,-3))return{c:'bad',t:'Orçamento antigo (>3 meses)',k:'vencido'};}
+  if(v==='imovel30d'){if(!rec.emissao)return{c:'warn',t:'Sem data',k:'semdata'};if(rec.emissao<addD(prazo,-30))return{c:'bad',t:'Certidão com mais de 30 dias',k:'vencido'};}
+  return{c:'ok',t:'Completo',k:'ok'};
+}
+function docSummary(p){const e=S.editais[p.editalId];const rows=docRows(p,e).filter(r=>!r.it.opcional&&r.st.k!=='na');const ok=rows.filter(r=>r.st.k==='ok').length;const bad=rows.filter(r=>r.st.k==='vencido').length;const warn=rows.filter(r=>r.st.k==='semdata').length;const falta=rows.filter(r=>r.st.k==='falta').length;return{total:rows.length,ok,bad,warn,falta,pct:rows.length?ok/rows.length:0}}
+
+function calc(p){
+  const e=S.editais[p.editalId]||{};const L=e.limites||{};
+  const cv=(e.custosEvitados||[]).find(c=>c.nivel===p.nivelTensao)||{cee:0,ced:0};
+  const i=e.taxaDesconto??0.08;const frc=n=>{n=Math.max(1,+n||1);const a=Math.pow(1+i,n);return i*a/(a-1)};
+  const acoes=(p.acoes||[]).map(a=>{const q=+a.qtd||0;const dP=q*((+a.pa||0)-(+a.pd||0))/1000;const fcp=Math.min(1,((+a.nup||0)*(+a.nd||0)*(+a.nm||0))/792);
+    const ee=a.eeManual!==''&&a.eeManual!=null&&!isNaN(+a.eeManual)&&+a.eeManual>0?+a.eeManual:dP*(+a.horas||0)/1000;
+    const rdp=a.rdpManual!==''&&a.rdpManual!=null&&!isNaN(+a.rdpManual)&&+a.rdpManual>0?+a.rdpManual:dP*fcp;
+    const custo=q*(+a.custo||0);return{...a,dP,fcp,ee,rdp,custo,ben:ee*cv.cee+rdp*cv.ced}});
+  const c=p.custos||{};const g=k=>+c[k]||0;
+  const E=acoes.reduce((s,a)=>s+a.custo,0);
+  const MOT=g('diag')+g('projExec')+g('gerenc')+g('relFinal')+g('motOutros');
+  const MKT=g('mkt'),TR=g('trein'),DS=g('desc'),MV=g('mv'),CP=g('contrapartida');
+  const mopC=e.mop||{fixo:29535.52,pct:.05};
+  const MOP=mopC.fixo+mopC.pct*(E+MOT+MKT+TR+DS+MV);
+  const ADMP=Math.max(0,(E+MOT+TR+DS+MV)/19-MKT);
+  const PEE=E+MOT+MKT+TR+DS+MV+MOP+ADMP;const TOT=PEE+CP;
+  let caP=0,caT=0;for(const a of acoes){const sh=E?a.custo/E:0;caP+=(a.custo+(PEE-E)*sh)*frc(a.vida);caT+=(a.custo+(TOT-E)*sh)*frc(a.vida)}
+  const B=acoes.reduce((s,a)=>s+a.ben,0);
+  const rcbP=B?caP/B:NaN,rcbT=B?caT/B:NaN;
+  const soFI=acoes.length&&acoes.every(a=>/Fonte incentivada/.test(a.uso));
+  const rmax=(e.rcbMax||{})[soFI?'fi':p.modalidade]??0.8;
+  const tip=(e.tipologias||[]).find(t=>t.nome===p.tipologia);
+  const lim=(v,cfg,nome,ref)=>{if(cfg==null)return null;const pct=typeof cfg==='number'?cfg:cfg.pct;const teto=typeof cfg==='number'?Infinity:(cfg.teto??Infinity);const max=Math.min(pct*PEE,teto);return{nome,ref,v,max,ok:v<=max+0.5,desc:(pct*100).toLocaleString('pt-BR')+'% do PEE'+(isFinite(teto)?' ou '+brl(teto):'')}};
+  const checks=[lim(MOT,L.mot,'Mão de obra de terceiros (total)','ET 5.4.1'),lim(g('diag'),L.diag,'Diagnóstico energético','ET 5.4.1.1'),lim(g('projExec'),L.projExec,'Projeto executivo','ET 5.4.1.2'),lim(g('gerenc'),L.gerenc,'Gerenciamento','ET 5.4.1.3'),lim(g('relFinal'),L.relFinal,'Relatório final','ET 5.4.1.4'),lim(MV,L.mv,'Medição e verificação','ET 5.4.2'),lim(MKT,L.mkt,'Marketing','ET 5.4.3'),lim(TR,L.trein,'Treinamento e capacitação','ET 5.4.4')].filter(Boolean);
+  return{acoes,E,MOT,MKT,TR,DS,MV,CP,MOP,ADMP,PEE,TOT,B,EE:acoes.reduce((s,a)=>s+a.ee,0),RDP:acoes.reduce((s,a)=>s+a.rdp,0),rcbP,rcbT,rmax,tip,checks,cv,soFI};
+}
+function projIssues(p){
+  const e=S.editais[p.editalId];const out=[];if(!e)return out;
+  const ds=docSummary(p);
+  if(ds.bad)out.push({c:'bad',t:ds.bad+' documento(s) fora da validade',v:'docs'});
+  if(ds.falta)out.push({c:PREP.includes(p.etapa)?'warn':'bad',t:ds.falta+' documento(s) faltando',v:'docs'});
+  if(e.rcbMax&&(p.acoes||[]).length){const k=calc(p);
+    if(isFinite(k.rcbP)&&k.rcbP>k.rmax)out.push({c:'bad',t:'RCB '+nf(k.rcbP)+' acima do limite '+nf(k.rmax),v:'rcb'});
+    k.checks.filter(x=>!x.ok).forEach(x=>out.push({c:'bad',t:x.nome+' acima do limite ('+x.ref+')',v:'rcb'}));
+    if(k.tip&&(k.PEE<k.tip.min||k.PEE>k.tip.max))out.push({c:'bad',t:'Valor PEE '+mi(k.PEE)+' fora da faixa da tipologia',v:'rcb'});}
+  const ucs=(p.ucs||[]).map(u=>u.numero).filter(Boolean);
+  arr('projetos').filter(o=>o.id!==p.id&&o.editalId===p.editalId&&o.etapa!=='perdido').forEach(o=>{
+    const dup=(o.ucs||[]).filter(u=>ucs.includes(u.numero));if(dup.length)out.push({c:'bad',t:'UC '+dup[0].numero+' também está em "'+o.nome+'"',v:'valid'});
+    if(p.tipologia==='Iluminação Pública'&&o.tipologia==='Iluminação Pública'&&p.municipio&&o.municipio===p.municipio)out.push({c:'bad',t:'Outro projeto de IP no mesmo município',v:'valid'});});
+  return out;
+}
+
+/* ---------- db ---------- */
+async function save(col,id,data,merge){if(!S.db){toast('Abra a página no Claude para salvar');return false}
+  try{const ref=S.db.collection(col).doc(id);if(merge)await ref.update(data);else await ref.set(data);return true}
+  catch(err){if(err&&err.code==='invalid_argument'&&!merge){S.ro=true;render()}toast(err&&err.code==='quota_exceeded'?'Limite de armazenamento atingido':'Não foi possível salvar ('+(err&&err.code||'erro')+')');return false}}
+async function del(col,id){if(!S.db)return;try{await S.db.collection(col).doc(id).delete()}catch(e){toast('Não foi possível excluir')}}
+async function boot(){
+  if(!window.claude||!window.claude.use){S.ready=true;render();return}
+  const db=await window.claude.use('db').catch(()=>null);
+  try{const u=await window.claude.use('user');if(u){const w=await u.can('data.write');if(w===false)S.ro=true}}catch(e){}
+  S.db=db;S.ready=true;
+  if(!db){render();return}
+  for(const c of COLS){db.collection(c).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]={id:d.id,...d.data()}});S[c]=o;S['l_'+c]=true;scheduleRender()},err=>{S['l_'+c]=true;scheduleRender()})}
+  render();
+}
+let _rt;function scheduleRender(){cancelAnimationFrame(_rt);_rt=requestAnimationFrame(render)}
+
+/* ---------- formulários e modais ---------- */
+const dlg=$('#dlg');
+function modal(title,body,foot){dlg.innerHTML=`<div class="dlg"><header><h3>${h(title)}</h3><button class="btn ghost sm" data-act="close" aria-label="Fechar">Fechar</button></header><div class="body">${body}</div>${foot?`<footer>${foot}</footer>`:''}</div>`;if(!dlg.open)dlg.showModal()}
+function closeModal(){if(dlg.open)dlg.close()}
+let FORM=null;
+function form(title,fields,vals,onSubmit,extraFoot){
+  vals=vals||{};
+  const fh=fields.map(f=>{const id='f_'+f.k;const v=vals[f.k]??f.def??'';let inp;
+    if(f.t==='select')inp=`<select id="${id}" name="${f.k}">${f.o.map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o];return`<option value="${h(val)}"${String(val)===String(v)?' selected':''}>${h(lab)}</option>`}).join('')}</select>`;
+    else if(f.t==='textarea')inp=`<textarea id="${id}" name="${f.k}">${h(v)}</textarea>`;
+    else if(f.t==='check')return`<div class="field ${f.full?'full':''}"><label class="check"><input type="checkbox" id="${id}" name="${f.k}"${v?' checked':''}> ${h(f.l)}</label>${f.hint?`<span class="hint">${h(f.hint)}</span>`:''}</div>`;
+    else inp=`<input id="${id}" name="${f.k}" type="${f.t||'text'}" value="${h(v)}"${f.t==='number'?' step="any"':''}${f.req?' required':''}>`;
+    return`<div class="field ${f.full||f.t==='textarea'?'full':''}"><label for="${id}">${h(f.l)}</label>${inp}${f.hint?`<span class="hint">${h(f.hint)}</span>`:''}</div>`}).join('');
+  FORM={fields,onSubmit};
+  modal(title,`<form id="fm" class="fgrid" novalidate>${fh}</form>`,`${extraFoot||''}<button class="btn" data-act="close">Cancelar</button><button class="btn pri" data-act="submitForm">Salvar</button>`);
+}
+async function submitForm(){const fm=$('#fm');if(!fm||!FORM)return;const o={};
+  for(const f of FORM.fields){const el=fm.elements[f.k];if(!el)continue;o[f.k]=f.t==='check'?el.checked:f.t==='number'?(el.value===''?'':+el.value):el.value.trim();if(f.req&&!o[f.k]){el.focus();toast('Preencha: '+f.l);return}}
+  const ok=await FORM.onSubmit(o);if(ok!==false){closeModal();toast('Salvo')}}
+function confirmBox(title,text,label,fn){CONF=fn;modal(title,`<p>${h(text)}</p>`,`<button class="btn" data-act="close">Cancelar</button><button class="btn pri" data-act="confirmYes">${h(label)}</button>`)}
+let CONF=null;
+
+/* ---------- modelos de mensagem ---------- */
+function compose({para,assunto,corpo,tel,titulo}){
+  const mail=`mailto:${encodeURIComponent(para||'')}?subject=${encodeURIComponent(assunto||'')}&body=${encodeURIComponent(corpo||'')}`;
+  const wa=tel?`https://wa.me/55${String(tel).replace(/\D/g,'').replace(/^55/,'')}?text=${encodeURIComponent(corpo||'')}`:'';
+  modal(titulo||'Escrever mensagem',`
+    <div class="field"><label>Para</label><div class="row"><span class="copyable" id="cpTo">${h(para||'(sem e-mail cadastrado)')}</span>${para?`<button class="btn sm" data-act="copyTxt" data-src="cpTo">Copiar</button>`:''}</div></div>
+    <div class="field"><label for="cpSub">Assunto</label><input id="cpSub" value="${h(assunto||'')}"></div>
+    <div class="field"><label for="cpBody">Mensagem</label><textarea id="cpBody" style="min-height:240px">${h(corpo||'')}</textarea></div>
+    <p class="small muted">Copie o texto para o seu e-mail ou WhatsApp. Os botões de abrir podem não funcionar em todos os navegadores.</p>`,
+    `${wa?`<a class="btn" href="${h(wa)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>`:''}<a class="btn" href="${h(mail)}">Abrir no app de e-mail</a><button class="btn pri" data-act="copyMsg">Copiar assunto e texto</button>`);
+}
+function tplCliente(c,tipo){
+  const ct=(c.contatos||[]).find(x=>x.principal)||(c.contatos||[])[0]||{};
+  const p=arr('projetos').find(x=>x.clienteId===c.id&&x.etapa!=='perdido');
+  const e=p?S.editais[p.editalId]:arr('editais').find(x=>x.status==='aberto');
+  const nome=ct.nome?ct.nome.split(' ')[0]:'';
+  const prazo=e?fd(e.prazoSubmissao):'';
+  let assunto='',corpo='';
+  if(tipo==='apresentacao'){assunto=`Projeto de eficiência energética sem custo pelo PEE${e?' — '+e.codigo:''}`;
+    corpo=`Olá${nome?' '+nome:''},\n\nSomos uma ESCO que desenvolve projetos do Programa de Eficiência Energética (PEE), regulado pela ANEEL e financiado pela ${e?(S.distribuidoras[e.distribuidoraId]||{}).nome||'distribuidora':'distribuidora'}.\n\nPelo perfil da ${c.nome}, o projeto se enquadraria na tipologia ${c.tipologia||'—'}, na modalidade ${MOD[c.modalidade]||'a definir'}${c.modalidade==='fp'?' (recursos a fundo perdido, sem reembolso)':c.modalidade==='cd'?' (o investimento é pago com a própria economia de energia, em até 5 anos)':''}.\n\nAções típicas: troca de iluminação por LED, ar-condicionado inverter, motores de alto rendimento e, quando viável, geração solar.\n\n${e&&e.prazoSubmissao?`A chamada pública ${e.codigo} recebe propostas até ${prazo}. Para chegar a tempo, o ideal é fazermos uma visita técnica nas próximas semanas.\n\n`:''}Podemos agendar uma conversa rápida esta semana?\n\nAtenciosamente,`;}
+  if(tipo==='documentos'){
+    const falt=p?docRows(p,e).filter(r=>r.st.k==='falta'||r.st.k==='vencido'||r.st.k==='semdata').map(r=>`• ${r.it.nome}${r.uc?' (UC '+r.uc.numero+')':''}${r.st.k==='vencido'?' — enviar versão atualizada':''}`):[];
+    assunto=`Documentos pendentes${p?' — '+p.nome:''}`;
+    corpo=`Olá${nome?' '+nome:''},\n\nPara concluirmos a proposta${e?' da '+e.codigo:''}${prazo?' (prazo de submissão: '+prazo+')':''}, ainda precisamos dos itens abaixo:\n\n${falt.length?falt.join('\n'):'• (nenhuma pendência registrada)'}\n\nCertidões precisam estar válidas na data de envio da proposta, e a fatura de energia deve ser de no máximo 3 meses antes da submissão.\n\nPode nos enviar até ${e&&e.prazoSubmissao?fd(addD(e.prazoSubmissao,-7)):'a próxima semana'}?\n\nObrigado,`;}
+  if(tipo==='visita'){assunto=`Agendamento de visita técnica — ${c.nome}`;
+    corpo=`Olá${nome?' '+nome:''},\n\nGostaríamos de agendar a visita técnica para o levantamento do diagnóstico energético na ${c.nome}${c.municipio?' ('+c.municipio+')':''}.\n\nNa visita vamos:\n• registrar os equipamentos atuais (iluminação, climatização, motores) com fotos das placas;\n• conferir os horários de funcionamento de cada ambiente;\n• coletar a fatura de energia mais recente de cada unidade consumidora.\n\nA visita leva cerca de ${c.tipologia==='Iluminação Pública'?'2 dias':'meio período'}. Quais datas funcionam para vocês?\n\nAtenciosamente,`;}
+  compose({para:ct.email,tel:ct.telefone,assunto,corpo,titulo:'Mensagem para '+c.nome});
+}
+function tplEsclarecimento(e){
+  const d=S.distribuidoras[e.distribuidoraId]||{};
+  compose({titulo:'Pedido de esclarecimento',para:e.emailEsclarecimento||d.emailPEE,assunto:e.assuntoEsclarecimento||('Esclarecimento '+e.codigo),
+    corpo:`Prezados,\n\nNome completo: [seu nome]\nEmpresa: [razão social da ESCO]\nDocumento do edital: [Regulamento / Especificação Técnica]\nItem: [ex.: 9.3.6]\n\nDúvida:\n[descreva a dúvida de forma objetiva]\n\nAtenciosamente,`});
+}
+
+/* ---------- renderização ---------- */
+const NAV=[['painel','Início','O que fazer hoje'],['projetos','Projetos','Propostas e obras'],['clientes','Clientes','Quem recebe o projeto'],['editais','Editais','Chamadas e regras'],['pipeline','Pipeline','Visão por fase'],['distribuidoras','Distribuidoras','Cemig, Light e outras']];
+const PHASES=[['Prospecção',['prospeccao','visita'],'Primeiro contato e visita técnica'],['Preparação',['documentacao','diagnostico'],'Documentos, diagnóstico e RCB'],['Submissão',['pronto','submetido'],'Pronto para enviar ou já enviado'],['Execução',['aprovado','execucao','mv'],'Obra, M&V e relatório'],['Encerrado',['concluido','perdido'],'Concluído ou não aprovado']];
+const phaseIdx=et=>Math.max(0,PHASES.findIndex(ph=>ph[1].includes(et)));
+const NEXT_HINT={prospeccao:'Apresente o PEE ao cliente e agende a visita técnica.',visita:'Faça a visita técnica: fotos das placas, horários de uso e faturas.',documentacao:'Reúna os documentos que faltam e confira as validades.',diagnostico:'Cadastre as ações de eficiência e confira se a RCB fica abaixo do limite.',pronto:'Revise a conferência final e envie a proposta no sistema da distribuidora.',submetido:'Acompanhe o resultado e responda a pedidos de esclarecimento.',aprovado:'Envie a documentação do contrato e agende a reunião de abertura.',execucao:'Atualize as etapas da obra e guarde as fotos de antes e depois.',mv:'Conclua a medição pós-obra e o relatório final.',concluido:'Projeto concluído.',perdido:'Registre o motivo e avalie reapresentar na próxima chamada.'};
+function render(){
+  $('#nav').innerHTML=NAV.map(([k,l,s])=>`<button data-act="go" data-v="${k}"${S.view===k?' aria-current="page"':''}><b>${l}</b><small>${s}</small></button>`).join('');
+  $('#foot').innerHTML=S.db?(S.ro?'Somente leitura: peça acesso de edição ao dono.':'Salvo automaticamente e compartilhado com a equipe.'):'';
+  const V={painel:vPainel,editais:vEditais,distribuidoras:vDist,clientes:vClientes,pipeline:vPipeline,projetos:vProjetos}[S.view]||vPainel;
+  const loading=S.db&&!COLS.every(c=>S['l_'+c]);
+  $('#view').innerHTML=(!S.ready||loading)?`<div class="empty">Carregando dados…</div>`:(!S.db?`<div class="banner">Os dados desta página ficam guardados no Claude. Abra o link no Claude com a sua conta para ver e editar os registros.</div>`:'')+V();
+}
+const exChip=o=>o&&o.exemplo?' <span class="chip ex">exemplo</span>':'';
+const emptyState=(t,s,btn)=>`<div class="empty"><b>${h(t)}</b><span>${h(s)}</span>${btn||''}</div>`;
+function verdictOf(p){if(!(p.acoes||[]).length)return{c:'',t:'Sem cálculo',k:null};const k=calc(p);if(!isFinite(k.rcbP))return{c:'',t:'Sem cálculo',k};const bad=k.rcbP>k.rmax||k.checks.some(x=>!x.ok)||(k.tip&&(k.PEE<k.tip.min||k.PEE>k.tip.max));return{c:bad?'bad':'ok',t:bad?'Revisar viabilidade':'Viável',k}}
+function projCard(p){
+  const c=S.clientes[p.clienteId]||{};const ds=docSummary(p);const ph=phaseIdx(p.etapa);const vd=verdictOf(p);
+  return`<button class="pcard" data-act="openProjeto" data-id="${p.id}">
+    <span><span class="t">${h(p.nome)}</span>${exChip(p)}<br><span class="s">${h(c.nome||'')}</span></span>
+    <span class="steps" aria-label="Fase ${ph+1} de 5">${PHASES.map((_,i)=>`<i class="${p.etapa==='perdido'&&i===4?'lost':i<=ph?'on':''}"></i>`).join('')}</span>
+    <span class="meta"><span>${h(STAGE[p.etapa]||'')}</span><span class="chip ${vd.c}">${vd.t}</span></span>
+    ${ds.total?`<span class="meta"><span>Documentos ${ds.ok} de ${ds.total}</span>${ds.bad?`<span style="color:var(--bad)">${ds.bad} vencido(s)</span>`:''}</span><span class="bar"><i class="ok" style="width:${ds.pct*100}%"></i><i class="bad" style="width:${ds.total?ds.bad/ds.total*100:0}%"></i></span>`:''}
+  </button>`;
+}
+function issueAction(i,p){const n=p.nome.split(' · ')[0];if(i.v==='docs'&&/fora da validade/.test(i.t))return`Renovar ${i.t.replace(' fora da validade','')} vencido(s) de ${n}`;if(i.v==='docs')return`Juntar ${i.t.replace(' faltando','')} pendente(s) de ${n}`;return`${n}: ${i.t}`}
+function nextStep(p){const iss=projIssues(p).filter(i=>i.c==='bad');if(iss.length)return{t:issueAction(iss[0],p),tab:iss[0].v==='valid'?'resumo':iss[0].v,more:iss.length-1};return{t:NEXT_HINT[p.etapa]||'',tab:null,more:0}}
+
+/* INÍCIO */
+function vPainel(){
+  const today=todayISO();const hr=new Date().getHours();
+  const eds=arr('editais').filter(e=>e.status==='aberto'&&e.prazoSubmissao&&e.prazoSubmissao>=today).sort((a,b)=>a.prazoSubmissao.localeCompare(b.prazoSubmissao));
+  const projs=arr('projetos').filter(p=>!['concluido','perdido'].includes(p.etapa)).sort((a,b)=>phaseIdx(b.etapa)-phaseIdx(a.etapa));
+  const tasks=[];
+  [...arr('clientes').map(c=>({o:c,tipo:'cliente'})),...arr('projetos').map(p=>({o:p,tipo:'projeto'}))].forEach(x=>{const pa=x.o.proximaAcao;if(pa&&pa.data&&pa.texto&&pa.data<=addD(today,2))tasks.push({c:pa.data<today?'warn':'',t:pa.texto,s:x.o.nome+' · '+(pa.data<today?'atrasado desde '+fd(pa.data):pa.data===today?'hoje':fd(pa.data)),act:x.tipo==='cliente'?'openCliente':'openProjeto',id:x.o.id,ord:pa.data})});
+  projs.forEach(p=>{const iss=projIssues(p).filter(i=>i.c==='bad');if(iss.length)tasks.push({c:'bad',t:issueAction(iss[0],p),s:iss.length>1?`e mais ${iss.length-1} problema(s) neste projeto`:STAGE[p.etapa],act:'openProjeto',id:p.id,tab:iss[0].v==='valid'?'resumo':iss[0].v,ord:'0'})});
+  tasks.sort((a,b)=>a.ord.localeCompare(b.ord));
+  let guide=!S._noGuide;try{if(localStorage.getItem('pee_guide')==='off')guide=false}catch(e){}
+  const e=eds[0];
+  return`<div class="head"><div><h1>${hr<12?'Bom dia':hr<18?'Boa tarde':'Boa noite'}</h1><p>${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p></div><div class="row"><button class="btn" data-act="newCliente">Novo cliente</button><button class="btn pri" data-act="newProjeto">Novo projeto</button></div></div>
+  ${guide?`<div class="guide"><button class="btn sm ghost x" data-act="hideGuide">Ocultar</button>
+    <div><em>1</em><b>Escolha o edital</b><span>Em Editais estão os prazos e o que cada chamada exige.</span></div>
+    <div><em>2</em><b>Cadastre o cliente</b><span>Quem recebe o projeto: hospital, prefeitura, indústria.</span></div>
+    <div><em>3</em><b>Crie o projeto</b><span>Ligue cliente e edital. O checklist de documentos aparece sozinho.</span></div>
+    <div><em>4</em><b>Siga o próximo passo</b><span>Cada projeto mostra o que falta fazer agora.</span></div></div>`:''}
+  ${e?`<div class="hero"><div class="d num">${days(today,e.prazoSubmissao)}</div><div class="t"><b>dias para enviar propostas na ${h(e.codigo)} da ${h((S.distribuidoras[e.distribuidoraId]||{}).sigla||'')}</b><span>Prazo ${fd(e.prazoSubmissao)} · ${arr('projetos').filter(p=>p.editalId===e.id&&p.etapa==='pronto').length} de ${arr('projetos').filter(p=>p.editalId===e.id&&PREP.includes(p.etapa)).length} propostas prontas</span></div><button class="btn" data-act="openEdital" data-id="${e.id}">Ver o edital</button></div>`:''}
+  <section class="box"><div class="sec"><h2>O que fazer agora</h2><span class="muted small">${tasks.length?tasks.length+' tarefa(s)':''}</span></div>
+    ${tasks.length?`<div class="tasks">${tasks.slice(0,6).map(t=>`<div class="task"><span class="dot ${t.c}"></span><div class="grow"><div class="t">${h(t.t)}</div><div class="s">${h(t.s)}</div></div><button class="btn sm" data-act="${t.act}" data-id="${t.id}"${t.tab?` data-tab="${t.tab}"`:''}>Resolver</button></div>`).join('')}</div>${tasks.length>6?`<p class="help">Mais ${tasks.length-6} tarefa(s) nos projetos e clientes.</p>`:''}`:`<p class="muted">Tudo em dia. Nenhum documento vencido nem contato atrasado.</p>`}
+  </section>
+  <section style="display:flex;flex-direction:column;gap:14px"><div class="sec"><h2>Projetos em andamento</h2><button class="btn sm ghost" data-act="go" data-v="projetos">Ver todos</button></div>
+    ${projs.length?`<div class="cardgrid">${projs.map(projCard).join('')}</div>`:emptyState('Nenhum projeto ainda','Crie um projeto ligando um cliente a um edital.','<button class="btn pri" data-act="newProjeto">Novo projeto</button>')}</section>`;
+}
+
+/* EDITAIS */
+function vEditais(){
+  const eds=arr('editais').sort((a,b)=>(b.status==='aberto')-(a.status==='aberto')||(a.prazoSubmissao||'9').localeCompare(b.prazoSubmissao||'9'));
+  if(!S.sel.edital||!S.editais[S.sel.edital])S.sel.edital=eds[0]&&eds[0].id;
+  const e=S.editais[S.sel.edital];
+  const stc={aberto:['ok','Aberto'],previsto:['acc','Previsto'],encerrado:['','Encerrado'],verificar:['warn','A verificar']};
+  return`<div class="head"><div><h1>Editais</h1><p>Chamadas públicas, prazos e o que cada uma exige.</p></div><button class="btn pri" data-act="newEdital">Cadastrar edital</button></div>
+  <div class="split"><div class="cards">${eds.map(x=>{const st=stc[x.status]||['',x.status];return`<button class="card" data-act="selEdital" data-id="${x.id}" aria-selected="${x.id===S.sel.edital}"><span class="row" style="justify-content:space-between"><span class="t">${h((S.distribuidoras[x.distribuidoraId]||{}).sigla||'')} ${h(x.codigo.replace(/ (Enel Rio|Energisa MR)$/,''))}</span><span class="chip ${st[0]}">${st[1]}</span></span><span class="s">${x.prazoSubmissao?'Prazo '+fd(x.prazoSubmissao):'Prazo a confirmar'}</span></button>`}).join('')||emptyState('Nenhum edital','Cadastre o primeiro edital.')}
+    <details class="more" style="margin-top:12px"><summary>Procurar novos editais</summary><div class="in"><p class="help">Abre uma busca na web por chamadas públicas de cada distribuidora.</p><div class="row">${arr('distribuidoras').sort(byName).map(d=>`<a class="btn sm" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent('"chamada pública de projetos" eficiência energética '+d.nome+' '+new Date().getFullYear())}">${h(d.sigla||d.nome)}</a>`).join('')}</div></div></details></div>
+    <div>${e?edDetail(e):''}</div></div>`;
+}
+function edDetail(e){
+  const d=S.distribuidoras[e.distribuidoraId]||{};const today=todayISO();
+  const ps=arr('projetos').filter(p=>p.editalId===e.id&&p.etapa!=='perdido');
+  const t0=(e.tipologias||[])[0];
+  const ess=[['Prazo para enviar',e.prazoSubmissao?fd(e.prazoSubmissao)+(e.prazoSubmissao>=today?' · faltam '+days(today,e.prazoSubmissao)+' dias':''):'A confirmar'],['Dinheiro disponível',e.recursoTotal?mi(e.recursoTotal):'—'],['Valor por proposta',t0?mi(t0.min)+' a '+mi(t0.max):'—'],['RCB máxima',e.rcbMax?nf(e.rcbMax.fp)+' fundo perdido · '+nf(e.rcbMax.cd)+' contrato de desempenho':'—']];
+  return`<div style="display:flex;flex-direction:column;gap:16px">
+  <section class="box"><div class="sec"><div><h2>${h(d.nome||'')} · ${h(e.codigo)}</h2>${e.prazoNota?`<p class="help" style="margin-top:4px">${h(e.prazoNota)}</p>`:''}</div><button class="btn sm ghost" data-act="editEdital" data-id="${e.id}">Editar</button></div>
+    <div class="facts">${ess.map(([l,v])=>`<div class="fact"><span class="l">${l}</span><span class="v">${h(v)}</span></div>`).join('')}</div>
+    <div class="row">${e.linkSubmissao?`<a class="btn pri" href="${h(e.linkSubmissao)}" target="_blank" rel="noopener">Abrir sistema de envio</a>`:''}${e.linkEdital?`<a class="btn" href="${h(e.linkEdital)}" target="_blank" rel="noopener">Abrir edital</a>`:''}${e.emailEsclarecimento?`<button class="btn" data-act="esclarecimento" data-id="${e.id}">Tirar uma dúvida</button>`:''}<button class="btn ghost" data-act="newProjeto">Criar projeto neste edital</button></div>
+    ${e.notas?`<p class="small" style="color:var(--ink-2)">${h(e.notas)}</p>`:''}
+    ${!e.checklist?`<div class="banner">As regras deste edital ainda não foram carregadas. Envie o PDF ao Claude para extrair prazos, limites e documentos.</div>`:''}</section>
+  ${e.tipologias?`<details class="more"><summary>Tipologias e recursos<small>${e.tipologias.length} tipologias · ${ps.length} proposta(s) nossa(s)</small></summary><div class="in"><div class="tbl-wrap"><table><thead><tr><th>Tipologia</th><th class="r">Recurso</th><th>Modalidade usual</th><th class="r">Nossas</th></tr></thead><tbody>${e.tipologias.map(t=>{const n=ps.filter(p=>p.tipologia===t.nome).length;return`<tr><td>${h(t.nome)}</td><td class="r num">${mi(t.recurso)}</td><td class="small">${h(t.modalidade||'')}</td><td class="r num">${n||'—'}</td></tr>`}).join('')}</tbody></table></div><p class="help">Cada proposta vale de ${mi(t0.min)} a ${mi(t0.max)} em recursos do PEE.</p></div></details>`:''}
+  ${e.checklist?`<details class="more"><summary>Documentos exigidos<small>${e.checklist.length} itens</small></summary><div class="in"><p class="help">Os projetos ligados a este edital já recebem esta lista e marcam o que falta.</p><div class="list">${e.checklist.map(it=>`<div class="item"><div class="grow"><div class="t">${h(it.nome)}</div><div class="s">${h({todos:'Sempre',fp:'Só fundo perdido',cd:'Só contrato de desempenho',cd_me:'Contrato de desempenho com ME/EPP',naoRemovivel:'Fundo perdido com usos não removíveis',tombado:'Imóvel tombado',fonteIncentivada:'Com geração solar'}[it.aplica]||'')}${it.escopo==='uc'?' · um por unidade consumidora':''}${it.validade?' · '+{certidao:'válida no dia do envio',fatura3m:'até 3 meses antes do envio',orcamento3m:'até 3 meses antes da publicação',imovel30d:'até 30 dias'}[it.validade]:''}${it.opcional?' · opcional':''}</div></div><span class="muted small mono">${h(it.ref)}</span></div>`).join('')}</div></div></details>`:''}
+  ${e.regras?`<details class="more"><summary>O que desclassifica<small>${e.regras.length} regras</small></summary><div class="in"><div class="list">${e.regras.map(r=>`<div class="item"><div class="grow">${h(r.t)}</div><span class="muted small mono">${h(r.ref||'')}</span></div>`).join('')}</div></div></details>`:''}
+  ${e.limites?`<details class="more"><summary>Limites de custo e parâmetros de cálculo</summary><div class="in"><div class="grid2"><div class="tbl-wrap"><table><thead><tr><th>Rubrica</th><th class="r">Máximo</th></tr></thead><tbody>${[['Mão de obra de terceiros','mot'],['Diagnóstico energético','diag'],['Projeto executivo','projExec'],['Gerenciamento','gerenc'],['Relatório final','relFinal'],['Medição e verificação','mv'],['Marketing','mkt'],['Treinamento','trein']].map(([l,k])=>{const c=e.limites[k];if(c==null)return'';const pct=typeof c==='number'?c:c.pct;return`<tr><td>${l}</td><td class="r num">${nf(pct*100,1)}%${c.teto?' ou '+brl(c.teto):''}</td></tr>`}).join('')}</tbody></table></div>
+    <div class="tbl-wrap"><table><tbody><tr><td>RCB máx. fundo perdido</td><td class="r num">${nf(e.rcbMax.fp)}</td></tr><tr><td>RCB máx. contrato de desempenho</td><td class="r num">${nf(e.rcbMax.cd)}</td></tr><tr><td>RCB máx. só geração solar</td><td class="r num">${nf(e.rcbMax.fi)}</td></tr><tr><td>Taxa de desconto</td><td class="r num">${nf(e.taxaDesconto*100,0)}% a.a.</td></tr><tr><td>Horário de ponta</td><td class="r">${h(e.horarioPonta||'')}</td></tr><tr><td>Prazo de execução</td><td class="r">${h(e.prazoExecucao||'')}</td></tr><tr><td>Retorno do contrato de desempenho</td><td class="r">${h(e.retornoCD||'')}</td></tr></tbody></table></div></div>
+    ${e.custosEvitados?`<h4>Custos evitados por nível de tensão</h4><div class="tbl-wrap"><table><thead><tr><th>Nível</th><th>Tensão</th><th class="r">CEE R$/MWh</th><th class="r">CED R$/kW·ano</th></tr></thead><tbody>${e.custosEvitados.map(c=>`<tr><td class="mono">${h(c.nivel)}</td><td>${h(c.desc)}</td><td class="r num">${nf(c.cee)}</td><td class="r num">${nf(c.ced)}</td></tr>`).join('')}</tbody></table></div>`:''}</div></details>`:''}
+  ${e.pontuacao?`<details class="more"><summary>Como as propostas são pontuadas<small>100 pontos</small></summary><div class="in"><div class="tbl-wrap"><table><tbody>${e.pontuacao.map(x=>`<tr><td class="mono">${h(x.item)}</td><td>${h(x.criterio)}</td><td class="r num">${x.pontos}</td></tr>`).join('')}</tbody></table></div></div></details>`:''}
+  </div>`;
+}
+
+/* DISTRIBUIDORAS */
+function vDist(){
+  const ds=arr('distribuidoras').sort(byName);
+  if(!S.sel.dist||!S.distribuidoras[S.sel.dist])S.sel.dist=ds[0]&&ds[0].id;
+  const d=S.distribuidoras[S.sel.dist];
+  return`<div class="head"><div><h1>Distribuidoras</h1><p>Quem abre as chamadas públicas e como falar com cada uma.</p></div><button class="btn pri" data-act="newDist">Cadastrar distribuidora</button></div>
+  <div class="split"><div class="cards">${ds.map(x=>`<button class="card" data-act="selDist" data-id="${x.id}" aria-selected="${x.id===S.sel.dist}"><span class="t">${h(x.nome)}</span><span class="s">${h(x.uf||'')} · ${arr('editais').filter(e=>e.distribuidoraId===x.id).length} edital(is)</span></button>`).join('')||emptyState('Nenhuma distribuidora','Cadastre as concessionárias com quem a ESCO trabalha.')}</div>
+  <div>${d?distDetail(d):''}</div></div>`;
+}
+function distDetail(d){
+  const eds=arr('editais').filter(e=>e.distribuidoraId===d.id);const ints=arr('interacoes').filter(i=>i.distribuidoraId===d.id).sort((a,b)=>b.data.localeCompare(a.data));
+  return`<div style="display:flex;flex-direction:column;gap:16px"><section class="box"><div class="sec"><div><h2>${h(d.nome)}</h2><p class="help">${h(d.area||'')}</p></div><button class="btn sm ghost" data-act="editDist" data-id="${d.id}">Editar</button></div>
+    <div class="row"><button class="btn pri" data-act="mailDist" data-id="${d.id}">Escrever e-mail</button><button class="btn" data-act="addInt" data-k="distribuidoraId" data-id="${d.id}">Registrar contato</button><a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent('"chamada pública de projetos" eficiência energética '+d.nome+' '+new Date().getFullYear())}">Procurar editais na web</a></div>
+    <div class="facts">${d.emailPEE?`<div class="fact"><span class="l">E-mail do PEE</span><span class="v"><span class="copyable">${h(d.emailPEE)}</span> <button class="btn sm ghost" data-act="copyVal" data-val="${h(d.emailPEE)}">Copiar</button></span></div>`:''}${d.site?`<div class="fact"><span class="l">Site</span><span class="v"><a href="${h(d.site)}" target="_blank" rel="noopener">${h(d.site.replace(/^https?:\/\//,''))}</a></span></div>`:''}${d.linkSubmissao?`<div class="fact"><span class="l">Sistema de envio</span><span class="v"><a href="${h(d.linkSubmissao)}" target="_blank" rel="noopener">${h(d.linkSubmissao.replace(/^https?:\/\//,''))}</a></span></div>`:''}</div>
+    ${eds.length?`<div class="row"><span class="help">Editais:</span>${eds.map(e=>`<button class="btn sm" data-act="openEdital" data-id="${e.id}">${h(e.codigo.replace(/ (Enel Rio|Energisa MR)$/,''))}</button>`).join('')}</div>`:''}</section>
+  <section class="box"><div class="sec"><h3>Pessoas de contato</h3><button class="btn sm ghost" data-act="addContato" data-col="distribuidoras" data-id="${d.id}">Adicionar</button></div>${contatosHTML(d,'distribuidoras')}</section>
+  <section class="box"><h3>Histórico</h3>${timeline(ints)}</section></div>`;
+}
+function contatosHTML(o,col){const cs=o.contatos||[];if(!cs.length)return`<p class="help">Nenhuma pessoa cadastrada ainda.</p>`;
+  return`<div class="list">${cs.map((c,i)=>`<div class="item"><div class="grow"><div class="t">${h(c.nome)}${c.principal?' <span class="chip acc">principal</span>':''}</div><div class="s">${h(c.cargo||'')}</div><div class="row small" style="margin-top:6px">${c.email?`<span class="copyable">${h(c.email)}</span><button class="btn sm ghost" data-act="copyVal" data-val="${h(c.email)}">Copiar</button>`:''}${c.telefone?`<span class="copyable">${h(c.telefone)}</span><a class="btn sm ghost" target="_blank" rel="noopener" href="https://wa.me/55${h(String(c.telefone).replace(/\D/g,'').replace(/^55/,''))}">WhatsApp</a>`:''}</div></div><button class="btn sm ghost" data-act="editContato" data-col="${col}" data-id="${o.id}" data-i="${i}">Editar</button></div>`).join('')}</div>`}
+function timeline(ints,n){n=n||4;if(!ints.length)return`<p class="help">Nenhum contato registrado.</p>`;const ev=i=>`<div class="ev"><span class="d">${fd(i.data)}</span><div><span class="chip">${h(i.tipo)}</span> ${h(i.resumo)}${i.por?` <span class="muted small">· ${h(i.por)}</span>`:''} <button class="btn sm ghost danger" data-act="delInt" data-id="${i.id}">Excluir</button></div></div>`;
+  return`<div class="tl">${ints.slice(0,n).map(ev).join('')}</div>${ints.length>n?`<details class="more"><summary>Ver mais ${ints.length-n} registro(s)</summary><div class="in tl">${ints.slice(n).map(ev).join('')}</div></details>`:''}`}
+
+/* CLIENTES */
+function vClientes(){
+  let cs=arr('clientes').sort(byName);
+  const q=S.q.toLowerCase();if(q)cs=cs.filter(c=>[c.nome,c.municipio,c.tipologia,c.cnpj].join(' ').toLowerCase().includes(q));
+  if(S.cfilter!=='todos')cs=cs.filter(c=>c.status===S.cfilter);
+  if(!S.sel.cliente||!S.clientes[S.sel.cliente])S.sel.cliente=cs[0]&&cs[0].id;
+  const c=S.clientes[S.sel.cliente];
+  return`<div class="head"><div><h1>Clientes</h1><p>Onde os projetos acontecem: hospitais, prefeituras, escolas, indústrias e condomínios.</p></div><button class="btn pri" data-act="newCliente">Novo cliente</button></div>
+  <div class="split"><div class="cards"><input class="search" id="q" placeholder="Buscar cliente ou município" value="${h(S.q)}" style="margin-bottom:6px">
+    <div class="seg" style="margin-bottom:8px;align-self:flex-start">${[['todos','Todos'],['lead','Leads'],['qualificado','Qualificados'],['ativo','Com projeto']].map(([k,l])=>`<button data-act="cfilter" data-v="${k}" aria-pressed="${S.cfilter===k}">${l}</button>`).join('')}</div>
+    ${cs.map(x=>`<button class="card" data-act="selCliente" data-id="${x.id}" aria-selected="${x.id===S.sel.cliente}"><span class="t">${h(x.nome)}</span><span class="s">${h(x.municipio||'')} · ${h(CLI[x.status]||'')}</span></button>`).join('')||emptyState('Nenhum cliente encontrado','Ajuste a busca ou cadastre um cliente.')}</div>
+  <div>${c?cliDetail(c):''}</div></div>`;
+}
+function cliDetail(c){
+  const ps=arr('projetos').filter(p=>p.clienteId===c.id);
+  const ints=arr('interacoes').filter(i=>i.clienteId===c.id||ps.some(p=>p.id===i.projetoId)).sort((a,b)=>b.data.localeCompare(a.data));
+  const pa=c.proximaAcao;
+  return`<div style="display:flex;flex-direction:column;gap:16px">
+  <section class="box"><div class="sec"><div><h2>${h(c.nome)}${exChip(c)}</h2><p class="help">${h(c.tipo||'')} · ${h(c.municipio||'')}${c.uf?'/'+h(c.uf):''}</p></div><div class="row"><button class="btn sm ghost" data-act="editCliente" data-id="${c.id}">Editar</button><button class="btn sm ghost danger" data-act="delCliente" data-id="${c.id}">Excluir</button></div></div>
+    <div class="next" style="background:${pa&&pa.data&&pa.data<todayISO()?'var(--warn-soft)':'var(--accent-soft)'}"><div class="grow"><div class="l">Próxima ação</div><div class="t">${pa&&pa.texto?h(pa.texto):'Nenhuma ação definida'}</div>${pa&&pa.data?`<div class="small">${fd(pa.data)}${pa.data<todayISO()?' · atrasada':''}</div>`:''}</div><button class="btn sm" data-act="nextAction" data-col="clientes" data-id="${c.id}">${pa&&pa.texto?'Alterar':'Definir'}</button></div>
+    <div><h4 style="margin-bottom:8px">Escrever para o cliente</h4><div class="row"><button class="btn" data-act="tplCli" data-t="apresentacao" data-id="${c.id}">Apresentar o PEE</button><button class="btn" data-act="tplCli" data-t="visita" data-id="${c.id}">Agendar visita</button><button class="btn" data-act="tplCli" data-t="documentos" data-id="${c.id}">Pedir documentos</button><button class="btn ghost" data-act="addInt" data-k="clienteId" data-id="${c.id}">Registrar contato</button></div></div></section>
+  <section class="box"><div class="sec"><h3>Projetos</h3><button class="btn sm ghost" data-act="newProjeto" data-cli="${c.id}">Criar projeto</button></div>${ps.length?`<div class="cardgrid">${ps.map(projCard).join('')}</div>`:'<p class="help">Nenhum projeto ainda.</p>'}</section>
+  <section class="box"><div class="sec"><h3>Pessoas de contato</h3><button class="btn sm ghost" data-act="addContato" data-col="clientes" data-id="${c.id}">Adicionar</button></div>${contatosHTML(c,'clientes')}</section>
+  <section class="box"><h3>Histórico</h3>${timeline(ints,3)}</section>
+  <details class="more"><summary>Dados cadastrais</summary><div class="in"><div class="facts"><div class="fact"><span class="l">CNPJ</span><span class="v mono">${h(c.cnpj||'—')}</span></div><div class="fact"><span class="l">Distribuidora</span><span class="v">${h((S.distribuidoras[c.distribuidoraId]||{}).nome||'—')}</span></div><div class="fact"><span class="l">Tipologia</span><span class="v">${h(c.tipologia||'—')}</span></div><div class="fact"><span class="l">Modalidade</span><span class="v">${h(MOD[c.modalidade]||'—')}</span></div></div>${c.notas?`<p class="small">${h(c.notas)}</p>`:''}</div></details>
+  </div>`;
+}
+
+/* PIPELINE */
+function vPipeline(){
+  const ps=arr('projetos');
+  return`<div class="head"><div><h1>Pipeline</h1><p>Todos os projetos agrupados em cinco fases. Mude a etapa pelo seletor de cada cartão.</p></div><button class="btn pri" data-act="newProjeto">Novo projeto</button></div>
+  <div class="kanban">${PHASES.map(([l,stages,hint])=>{const items=ps.filter(p=>stages.includes(p.etapa));return`<div class="col"><h3><span>${l}</span><span class="num muted">${items.length}</span></h3><p class="hint">${hint}</p>${items.map(p=>{const c=S.clientes[p.clienteId]||{};const vd=verdictOf(p);const ds=docSummary(p);
+    return`<div class="kcard"><span class="t" data-act="openProjeto" data-id="${p.id}" role="button" tabindex="0">${h(p.nome)}</span><span class="small muted">${h(c.nome||'')}</span><div class="row" style="justify-content:space-between"><span class="small">Docs ${ds.ok}/${ds.total}</span><span class="chip ${vd.c}">${vd.t}</span></div><select data-chg="stage" data-id="${p.id}" aria-label="Etapa">${STAGES.map(([sk,sl])=>`<option value="${sk}"${sk===p.etapa?' selected':''}>${sl}</option>`).join('')}</select></div>`}).join('')}</div>`}).join('')}</div>`;
+}
+
+/* PROJETOS */
+function vProjetos(){
+  if(S.sel.projeto&&S.projetos[S.sel.projeto])return projDetail(S.projetos[S.sel.projeto]);
+  const ps=arr('projetos').sort((a,b)=>phaseIdx(a.etapa)-phaseIdx(b.etapa));
+  return`<div class="head"><div><h1>Projetos</h1><p>Clique em um projeto para ver o próximo passo, os documentos e a viabilidade.</p></div><button class="btn pri" data-act="newProjeto">Novo projeto</button></div>
+  ${ps.length?PHASES.map(([l,stages])=>{const it=ps.filter(p=>stages.includes(p.etapa));return it.length?`<section style="display:flex;flex-direction:column;gap:12px"><h4>${l} · ${it.length}</h4><div class="cardgrid">${it.map(projCard).join('')}</div></section>`:''}).join(''):emptyState('Nenhum projeto','Crie um projeto a partir de um cliente e de um edital.','<button class="btn pri" data-act="newProjeto">Novo projeto</button>')}`;
+}
+function projDetail(p){
+  const e=S.editais[p.editalId]||{};const c=S.clientes[p.clienteId]||{};const ds=docSummary(p);const vd=verdictOf(p);const k=vd.k||calc(p);
+  const ph=phaseIdx(p.etapa);const nx=nextStep(p);
+  const T=[['resumo','Visão geral'],['docs','Documentos'],['rcb','Viabilidade'],['exec','Execução']];
+  const body={resumo:pResumo,docs:pDocs,rcb:pRcb,exec:pExec}[S.ptab]||pResumo;
+  return`<div><button class="btn ghost sm" data-act="backProj">← Projetos</button></div>
+  <div class="head" style="margin-top:-16px"><div><h1>${h(p.nome)}${exChip(p)}</h1><p>${h(c.nome||'')} · ${h((S.distribuidoras[e.distribuidoraId]||{}).sigla||'')} ${h(e.codigo||'')}</p></div>
+    <div class="row"><label class="small muted" for="stg">Etapa</label><select id="stg" class="btn" data-chg="stage" data-id="${p.id}">${STAGES.map(([sk,sl])=>`<option value="${sk}"${sk===p.etapa?' selected':''}>${sl}</option>`).join('')}</select></div></div>
+  <div class="stepper">${PHASES.map(([l],i)=>`<div class="${i<ph?'done':i===ph?'cur':''}"><i></i><span>${l}</span></div>`).join('')}</div>
+  ${nx.t?`<div class="next"><div class="grow"><div class="l">Próximo passo</div><div class="t">${h(nx.t)}</div>${nx.more?`<div class="small">e mais ${nx.more} problema(s) para resolver</div>`:''}</div>${nx.tab?`<button class="btn pri" data-act="ptab" data-t="${nx.tab}">Resolver</button>`:''}</div>`:''}
+  <div class="tiles">
+    <button class="tile" data-act="ptab" data-t="docs" style="all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px"><span class="l" style="font-size:12.5px;color:var(--ink-2)">Documentos</span><span class="v" style="font-family:var(--f-display);font-size:28px;font-weight:600">${ds.ok} de ${ds.total}</span><span class="bar"><i class="ok" style="width:${ds.pct*100}%"></i><i class="bad" style="width:${ds.total?ds.bad/ds.total*100:0}%"></i></span><span class="s" style="font-size:13px;color:var(--ink-3)">${ds.falta?ds.falta+' faltando':'nada faltando'}${ds.bad?' · '+ds.bad+' vencido(s)':''}</span></button>
+    <button class="tile" data-act="ptab" data-t="rcb" style="all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px"><span class="l" style="font-size:12.5px;color:var(--ink-2)">Viabilidade</span><span class="v" style="font-family:var(--f-display);font-size:28px;font-weight:600;color:${vd.c==='ok'?'var(--ok)':vd.c==='bad'?'var(--bad)':'inherit'}">${vd.t}</span><span class="s" style="font-size:13px;color:var(--ink-3)">${isFinite(k.rcbP)?'RCB '+nf(k.rcbP)+' (limite '+nf(k.rmax)+')':'cadastre as ações'}</span></button>
+    <button class="tile" data-act="ptab" data-t="rcb" style="all:unset;box-sizing:border-box;cursor:pointer;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:flex;flex-direction:column;gap:6px"><span class="l" style="font-size:12.5px;color:var(--ink-2)">Investimento do PEE</span><span class="v" style="font-family:var(--f-display);font-size:28px;font-weight:600">${(p.acoes||[]).length?mi(k.PEE):'—'}</span><span class="s" style="font-size:13px;color:var(--ink-3)">${(p.acoes||[]).length?'economia de '+nf(k.EE,0)+' MWh por ano':'sem ações cadastradas'}</span></button>
+  </div>
+  <div class="tabs" role="tablist">${T.map(([t,l])=>`<button role="tab" data-act="ptab" data-t="${t}" aria-selected="${S.ptab===t}">${l}</button>`).join('')}</div>
+  ${body(p,e,c,k)}`;
+}
+function pResumo(p,e,c,k){
+  const ints=arr('interacoes').filter(i=>i.projetoId===p.id||i.clienteId===p.clienteId).sort((a,b)=>b.data.localeCompare(a.data));
+  const iss=projIssues(p);const f=p.flags||{};
+  return`${iss.length?`<section class="box"><h3>Problemas encontrados</h3><div class="tasks">${iss.map(i=>`<div class="task"><span class="dot ${i.c}"></span><div class="grow t">${h(i.t)}</div><button class="btn sm" data-act="ptab" data-t="${i.v==='valid'?'resumo':i.v}">Ver</button></div>`).join('')}</div></section>`:''}
+  <div class="grid2"><section class="box"><div class="sec"><h3>Dados do projeto</h3><button class="btn sm ghost" data-act="editProjeto" data-id="${p.id}">Editar</button></div><div class="facts">
+    <div class="fact"><span class="l">Cliente</span><span class="v"><a href="#" data-act="openCliente" data-id="${c.id||''}">${h(c.nome||'—')}</a></span></div><div class="fact"><span class="l">Tipologia</span><span class="v">${h(p.tipologia||'—')}</span></div><div class="fact"><span class="l">Modalidade</span><span class="v">${h(MOD[p.modalidade]||'—')}</span></div><div class="fact"><span class="l">Responsável</span><span class="v">${h(p.responsavel||'—')}</span></div>
+    <div class="fact"><span class="l">Próxima ação</span><span class="v">${p.proximaAcao&&p.proximaAcao.data?`${fd(p.proximaAcao.data)}: ${h(p.proximaAcao.texto)}`:'—'} <button class="btn sm ghost" data-act="nextAction" data-col="projetos" data-id="${p.id}">Definir</button></span></div></div>
+    <div class="row">${[f.meEpp&&'ME/EPP',f.naoRemovivel&&'Usos não removíveis',f.tombado&&'Imóvel tombado',f.fonteIncentivada&&'Geração solar',f.licitacao&&'Exige licitação'].filter(Boolean).map(x=>`<span class="chip">${x}</span>`).join('')}</div></section>
+  <section class="box"><div class="sec"><h3>Unidades consumidoras</h3><button class="btn sm ghost" data-act="addUC" data-id="${p.id}">Adicionar</button></div>${(p.ucs||[]).length?`<div class="list">${p.ucs.map((u,i)=>`<div class="item"><div class="grow"><div class="t mono">${h(u.numero)}</div><div class="s">${h(u.descricao||'')}</div></div><button class="btn sm ghost" data-act="editUC" data-id="${p.id}" data-i="${i}">Editar</button></div>`).join('')}</div>`:'<p class="help">Cadastre as UCs. Fatura e fotos são cobradas para cada uma.</p>'}</section></div>
+  <div class="grid2"><section class="box"><div class="sec"><h3>Pasta no OneDrive</h3><button class="btn sm ghost" data-act="editFolder" data-id="${p.id}">${p.pastaOneDrive?'Alterar':'Adicionar link'}</button></div>${p.pastaOneDrive?`<a class="btn" href="${h(p.pastaOneDrive)}" target="_blank" rel="noopener">Abrir pasta do projeto</a>`:'<p class="help">Cole o link da pasta para abrir direto daqui.</p>'}
+    <details class="more"><summary>Estrutura de pastas sugerida</summary><div class="in"><div class="folder">${h(folderTree(p))}</div></div></details></section>
+  <section class="box"><div class="sec"><h3>Histórico</h3><button class="btn sm ghost" data-act="addInt" data-k="projetoId" data-id="${p.id}">Registrar contato</button></div>${timeline(ints,3)}</section></div>
+  ${e.regras?`<details class="more"><summary>Conferência final antes de enviar<small>${e.regras.length} regras do edital</small></summary><div class="in"><div class="list">${e.regras.map(r=>`<div class="item"><div class="grow">${h(r.t)}</div><span class="muted small mono">${h(r.ref||'')}</span></div>`).join('')}</div></div></details>`:''}`;
+}
+function folderTree(p){const ucs=(p.ucs||[]).map(u=>u.numero);return`${p.nome}/
+├── 01_Habilitacao/        formulário, contrato social, poderes, CNPJ, anuência
+├── 02_Certidoes/          municipal, estadual, federal, FGTS, trabalhista
+├── 03_UCs/
+${(ucs.length?ucs:['xxxxxxxxxx']).map((u,i,a)=>`│   ${i===a.length-1?'└':'├'}── UC_${u}/   fatura, fotos do levantamento`).join('\n')}
+├── 04_Diagnostico/        relatório Word, planilha RCB, tabelas, ARTs
+├── 05_Orcamentos_Catalogos/
+├── 06_Execucao/           fotos antes e depois, descarte (MTR e CDF)
+└── 07_MV_Relatorio_Final/`}
+function pDocs(p,e){
+  if(!e.checklist)return`<div class="banner">Este edital ainda não tem a lista de documentos carregada.</div>`;
+  const all=docRows(p,e);const pend=all.filter(r=>['falta','vencido','semdata'].includes(r.st.k));
+  const rows=S.dfilter==='todos'?all:pend;
+  const groups={};rows.forEach(r=>{(groups[r.it.grupo]=groups[r.it.grupo]||[]).push(r)});
+  return`<div class="sec"><div class="seg"><button data-act="dfilter" data-v="pend" aria-pressed="${S.dfilter!=='todos'}">Pendentes (${pend.length})</button><button data-act="dfilter" data-v="todos" aria-pressed="${S.dfilter==='todos'}">Todos (${all.length})</button></div><button class="btn" data-act="tplCli" data-t="documentos" data-id="${p.clienteId}">Pedir pendências ao cliente</button></div>
+  <p class="help">Validades conferidas contra o prazo de envio (${fd(e.prazoSubmissao)}). Clique em Atualizar para registrar o arquivo e as datas.</p>
+  ${rows.length?Object.entries(groups).map(([g,rs])=>`<section class="box"><h3>${h(g)}</h3><div>${rs.map(r=>`<div class="docrow"><div class="grow"><div><b>${h(r.it.nome)}</b>${r.uc?` <span class="chip mono">UC ${h(r.uc.numero)}</span>`:''}</div><div class="s">${r.rec.arquivo?h(r.rec.arquivo):h(r.it.dica||r.it.ref)}${r.rec.validade?' · válido até '+fd(r.rec.validade):r.rec.emissao?' · emitido em '+fd(r.rec.emissao):''}</div></div><span class="chip ${r.st.c}">${h(r.st.t)}</span><button class="btn sm" data-act="editDoc" data-id="${p.id}" data-key="${h(r.key)}">Atualizar</button></div>`).join('')}</div></section>`).join(''):emptyState('Nenhum documento pendente','Todos os documentos exigidos estão completos e dentro da validade.')}`;
+}
+function pRcb(p,e,c,k){
+  const has=k.acoes.length&&isFinite(k.rcbP);const vd=verdictOf(p);
+  const pct=v=>Math.min(100,Math.max(0,v/1.2*100));
+  const fails=k.checks.filter(x=>!x.ok);const tipBad=k.tip&&(k.PEE<k.tip.min||k.PEE>k.tip.max);
+  return`<div class="verdict ${has?vd.c:'na'}"><div class="big num">${has?nf(k.rcbP):'—'}</div><div class="grow"><b>${!has?'Cadastre as ações de eficiência para calcular a RCB.':vd.c==='ok'?'Projeto viável: a RCB está abaixo do limite de '+nf(k.rmax)+' e os custos respeitam o edital.':k.rcbP>k.rmax?'RCB acima do limite de '+nf(k.rmax)+'. Reduza custos ou aumente a economia.':'A RCB está boa, mas há custos fora dos limites do edital.'}</b>
+    <span class="help">RCB é quanto o projeto custa por ano dividido pelo benefício anual para o sistema elétrico. Quanto menor, melhor. Estimativa pelo PROPEE; a planilha oficial da distribuidora prevalece.</span>
+    ${has?`<div class="gauge"><span class="fill" style="width:${pct(k.rcbP)}%;background:${k.rcbP>k.rmax?'var(--bad)':'var(--ok)'}"></span><b style="left:${pct(k.rmax)}%" title="limite"></b></div>`:''}</div></div>
+  ${(fails.length||tipBad)?`<section class="box"><h3>Ajustes necessários</h3><div class="tasks">${tipBad?`<div class="task"><span class="dot bad"></span><div class="grow"><div class="t">Valor do PEE fora da faixa da tipologia</div><div class="s">${brl(k.PEE)} · permitido de ${mi(k.tip.min)} a ${mi(k.tip.max)}</div></div></div>`:''}${fails.map(x=>`<div class="task"><span class="dot bad"></span><div class="grow"><div class="t">${h(x.nome)} acima do limite</div><div class="s">${brl(x.v)} · máximo ${brl(x.max)}</div></div><button class="btn sm" data-act="editCustos" data-id="${p.id}">Ajustar</button></div>`).join('')}</div></section>`:''}
+  <section class="box"><div class="sec"><h3>Ações de eficiência</h3><button class="btn pri sm" data-act="addAcao" data-id="${p.id}">Adicionar ação</button></div>
+    ${k.acoes.length?`<div class="tbl-wrap"><table><thead><tr><th>Ação</th><th class="r">Quantidade</th><th class="r">Economia por ano</th><th class="r">Custo</th><th></th></tr></thead><tbody>${k.acoes.map((a,i)=>`<tr><td><b>${h(a.uso)}</b><div class="small muted">${h(a.desc||'')}</div></td><td class="r num">${nf(+a.qtd,0)}</td><td class="r num">${nf(a.ee,1)} MWh</td><td class="r num">${brl(a.custo)}</td><td class="r"><button class="btn sm ghost" data-act="editAcao" data-id="${p.id}" data-i="${i}">Editar</button></td></tr>`).join('')}</tbody></table></div>`:emptyState('Nenhuma ação cadastrada','Adicione as trocas de equipamento levantadas na visita.')}</section>
+  <section class="box"><div class="sec"><h3>Resumo dos custos</h3><button class="btn sm" data-act="editCustos" data-id="${p.id}">Editar custos</button></div>
+    <div class="facts"><div class="fact"><span class="l">Equipamentos</span><span class="v num">${brl(k.E)}</span></div><div class="fact"><span class="l">Serviços e demais rubricas</span><span class="v num">${brl(k.MOT+k.MKT+k.TR+k.DS+k.MV)}</span></div><div class="fact"><span class="l">Custos da distribuidora</span><span class="v num">${brl(k.MOP+k.ADMP)}</span></div><div class="fact"><span class="l">Total pago pelo PEE</span><span class="v num"><b>${brl(k.PEE)}</b></span></div></div></section>
+  <details class="more"><summary>Detalhes do cálculo<small>parâmetros, rubricas e limites</small></summary><div class="in">
+    <p class="help">Nível ${h(p.nivelTensao||'—')}: CEE ${nf(k.cv.cee)} R$/MWh · CED ${nf(k.cv.ced)} R$/kW·ano · taxa ${nf((e.taxaDesconto??.08)*100,0)}% a.a. · RCB total com contrapartida ${isFinite(k.rcbT)?nf(k.rcbT):'—'}</p>
+    ${k.acoes.length?`<div class="tbl-wrap"><table><thead><tr><th>Ação</th><th class="r">W antes → depois</th><th class="r">h/ano</th><th class="r">FCP</th><th class="r">Vida</th><th class="r">Redução ponta</th><th class="r">Benefício/ano</th></tr></thead><tbody>${k.acoes.map(a=>`<tr><td>${h(a.uso)}</td><td class="r num">${nf(+a.pa,0)} → ${nf(+a.pd,0)}</td><td class="r num">${nf(+a.horas,0)}</td><td class="r num">${nf(a.fcp)}</td><td class="r num" style="white-space:nowrap">${a.vida} anos</td><td class="r num">${nf(a.rdp,1)} kW</td><td class="r num">${brl(a.ben)}</td></tr>`).join('')}</tbody></table></div>`:''}
+    <div class="grid2"><div class="tbl-wrap"><table><thead><tr><th>Rubrica</th><th class="r">Valor</th></tr></thead><tbody>${[['Materiais e equipamentos',k.E],['Mão de obra de terceiros',k.MOT],['Marketing',k.MKT],['Treinamento',k.TR],['Descarte',k.DS],['Medição e verificação',k.MV],['Mão de obra própria da distribuidora',k.MOP],['Administração própria',k.ADMP],['Contrapartida',k.CP]].map(([l,v])=>`<tr><td>${l}</td><td class="r num">${brl(v)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Limite</th><th class="r">Usado / máximo</th></tr></thead><tbody>${k.checks.map(x=>`<tr><td>${h(x.nome)}<div class="small muted mono">${h(x.ref)}</div></td><td class="r num" style="color:${x.ok?'inherit':'var(--bad)'}">${mi(x.v)} / ${mi(x.max)}</td></tr>`).join('')}</tbody></table></div></div></div></details>`;
+}
+function pExec(p,e){
+  const st=(p.execucao||{});const f=p.flags||{};
+  const et=ETAPAS.filter(([k])=>k!=='licitacao'||f.licitacao);
+  const done=et.filter(([k])=>(st[k]||{}).status==='concluida').length;
+  return`<section class="box"><div class="sec"><h3>Etapas da obra</h3><span class="help">${done} de ${et.length} concluídas · prazo de ${h(f.licitacao?'18 meses (com licitação)':'12 meses')} após a reunião de abertura</span></div>
+  <div class="tasks">${et.map(([k,l])=>{const s=st[k]||{};return`<div class="task"><span class="dot ${s.status==='concluida'?'':s.status==='andamento'?'warn':''}" style="${s.status==='concluida'?'background:var(--ok)':s.status==='andamento'?'':'background:var(--line-2)'}"></span><div class="grow"><div class="t">${l}</div><div class="s">${{concluida:'Concluída',andamento:'Em andamento'}[s.status]||'A fazer'}${s.inicio?' · '+fd(s.inicio):''}${s.fim?' até '+fd(s.fim):''}</div></div><button class="btn sm ghost" data-act="editEtapa" data-id="${p.id}" data-k="${k}">Atualizar</button></div>`}).join('')}</div>
+  <p class="help">O reembolso de cada etapa só sai depois de concluída e aprovada, com recibo assinado e três orçamentos ou licitação.</p></section>
+  ${e.fotosMinimas?`<details class="more"><summary>Fotos mínimas por etapa</summary><div class="in"><div class="tbl-wrap"><table><tbody>${e.fotosMinimas.map(x=>`<tr><td>${h(x.etapa)}</td><td class="r num">${x.qtd} fotos</td></tr>`).join('')}</tbody></table></div><p class="help">Fotos nítidas de 10 MP e 300 dpi, em JPEG, identificadas e sem repetição.</p></div></details>`:''}`;
+}
+
+/* ---------- ações ---------- */
+const optsDist=()=>[['','—'],...arr('distribuidoras').sort(byName).map(d=>[d.id,d.nome])];
+const optsCli=()=>arr('clientes').sort(byName).map(c=>[c.id,c.nome]);
+const optsEd=()=>arr('editais').map(e=>[e.id,e.codigo||e.nome]);
+function tipOpts(eid){const e=S.editais[eid]||arr('editais').find(x=>x.tipologias);return(e&&e.tipologias?e.tipologias.map(t=>t.nome):['Industrial','Residencial (Condomínios)','Comércio e Serviços','Poder Público','Serviços Públicos','Rural','Iluminação Pública'])}
+function nivelOpts(){const e=arr('editais').find(x=>x.custosEvitados);return e?e.custosEvitados.map(c=>[c.nivel,c.nivel+' · '+c.desc]):['A4','B3','B4']}
+const CLI_F=()=>[{k:'nome',l:'Nome',req:true,full:true},{k:'tipo',l:'Tipo de instituição',hint:'Ex.: hospital filantrópico, prefeitura, indústria'},{k:'cnpj',l:'CNPJ'},{k:'municipio',l:'Município'},{k:'uf',l:'UF'},{k:'distribuidoraId',l:'Distribuidora',t:'select',o:optsDist()},{k:'tipologia',l:'Tipologia provável',t:'select',o:tipOpts()},{k:'modalidade',l:'Modalidade',t:'select',o:[['fp','Fundo Perdido'],['cd','Contrato de Desempenho']]},{k:'status',l:'Status',t:'select',o:CLI_ST},{k:'notas',l:'Observações',t:'textarea'}];
+const PROJ_F=()=>[{k:'nome',l:'Nome do projeto',req:true,full:true},{k:'clienteId',l:'Cliente',t:'select',o:optsCli()},{k:'editalId',l:'Edital',t:'select',o:optsEd()},{k:'tipologia',l:'Tipologia',t:'select',o:tipOpts()},{k:'modalidade',l:'Modalidade',t:'select',o:[['fp','Fundo Perdido'],['cd','Contrato de Desempenho']]},{k:'nivelTensao',l:'Nível de tensão (maior entre as UCs)',t:'select',o:nivelOpts()},{k:'municipio',l:'Município'},{k:'responsavel',l:'Responsável na ESCO'},{k:'etapa',l:'Etapa',t:'select',o:STAGES},{k:'meEpp',l:'Proponente é ME/EPP',t:'check'},{k:'naoRemovivel',l:'Inclui usos finais não removíveis',t:'check'},{k:'tombado',l:'Imóvel tombado (patrimônio)',t:'check'},{k:'fonteIncentivada',l:'Inclui fonte incentivada (FV)',t:'check'},{k:'licitacao',l:'Cliente público precisa licitar',t:'check'}];
+const ACAO_F=[{k:'uso',l:'Uso final',t:'select',o:USOS},{k:'desc',l:'Descrição',hint:'Ex.: fluorescente T8 2x32 W → LED tubular 18 W'},{k:'qtd',l:'Quantidade',t:'number'},{k:'vida',l:'Vida útil (anos)',t:'number',hint:'Anexo B da ET; iluminação no máximo 15'},{k:'pa',l:'Potência antes por unidade (W)',t:'number',hint:'Inclua as perdas do reator'},{k:'pd',l:'Potência depois por unidade (W)',t:'number'},{k:'horas',l:'Horas de uso por ano',t:'number'},{k:'custo',l:'Custo unitário (R$)',t:'number',hint:'Material e equipamento'},{k:'nup',l:'Horas por dia na ponta (nup)',t:'number',hint:'Até 3 (17h às 20h)'},{k:'nd',l:'Dias úteis por mês na ponta (nd)',t:'number',def:22},{k:'nm',l:'Meses de uso por ano (nm)',t:'number',def:12},{k:'eeManual',l:'Energia economizada manual (MWh/ano)',t:'number',hint:'Opcional, para FV, aquecimento solar ou cálculos próprios'},{k:'rdpManual',l:'Redução na ponta manual (kW)',t:'number',hint:'Opcional'}];
+const CUSTO_F=[{k:'diag',l:'Diagnóstico energético',t:'number'},{k:'projExec',l:'Projeto executivo',t:'number'},{k:'gerenc',l:'Gerenciamento',t:'number'},{k:'relFinal',l:'Relatório final',t:'number'},{k:'motOutros',l:'Outros serviços de terceiros (instalação)',t:'number'},{k:'mkt',l:'Marketing',t:'number'},{k:'trein',l:'Treinamento e capacitação',t:'number'},{k:'desc',l:'Descarte',t:'number'},{k:'mv',l:'Medição e verificação',t:'number'},{k:'contrapartida',l:'Contrapartida (cliente ou terceiros)',t:'number'}];
+const CONT_F=[{k:'nome',l:'Nome',req:true},{k:'cargo',l:'Cargo'},{k:'email',l:'E-mail',t:'email'},{k:'telefone',l:'Telefone',t:'tel'},{k:'principal',l:'Contato principal',t:'check'}];
+
+const ACT={
+  close:closeModal,submitForm,
+  confirmYes:async()=>{const f=CONF;CONF=null;closeModal();if(f)await f()},
+  go:t=>{S.view=t.dataset.v;if(t.dataset.v==='projetos')S.sel.projeto=null;setHash(S.view);render();window.scrollTo(0,0)},
+  selEdital:t=>{S.sel.edital=t.dataset.id;render()},
+  selDist:t=>{S.sel.dist=t.dataset.id;render()},
+  cfilter:t=>{S.cfilter=t.dataset.v;render()},
+  dfilter:t=>{S.dfilter=t.dataset.v;render()},
+  hideGuide:()=>{try{localStorage.setItem('pee_guide','off')}catch(e){}S._noGuide=true;render()},
+  openEdital:t=>{closeModal();S.sel.edital=t.dataset.id;S.view='editais';setHash('editais');render();window.scrollTo(0,0)},
+  selCliente:t=>{S.sel.cliente=t.dataset.id;render()},
+  openCliente:(t,ev)=>{ev.preventDefault();if(!t.dataset.id)return;S.sel.cliente=t.dataset.id;S.cfilter='todos';S.q='';S.view='clientes';setHash('clientes');render();window.scrollTo(0,0)},
+  openProjeto:t=>{S.sel.projeto=t.dataset.id;S.ptab=t.dataset.tab||'resumo';S.view='projetos';setHash('projetos');render();window.scrollTo(0,0)},
+  backProj:()=>{S.sel.projeto=null;render()},
+  ptab:t=>{S.ptab=t.dataset.t;render()},
+  copyVal:t=>copy(t.dataset.val),
+  copyTxt:t=>copy($('#'+t.dataset.src).textContent),
+  copyMsg:()=>copy('Assunto: '+$('#cpSub').value+'\n\n'+$('#cpBody').value,'Assunto e texto copiados'),
+  esclarecimento:t=>tplEsclarecimento(S.editais[t.dataset.id]),
+  tplCli:t=>{const c=S.clientes[t.dataset.id];if(c)tplCliente(c,t.dataset.t)},
+  mailDist:t=>{const d=S.distribuidoras[t.dataset.id];const ct=(d.contatos||[])[0]||{};compose({titulo:'E-mail para '+d.nome,para:ct.email||d.emailPEE,assunto:'',corpo:`Prezados,\n\n\n\nAtenciosamente,`})},
+  newEdital:()=>form('Cadastrar edital',[{k:'codigo',l:'Código',req:true,hint:'Ex.: CPP 001/2027'},{k:'nome',l:'Nome completo',full:true},{k:'distribuidoraId',l:'Distribuidora',t:'select',o:optsDist()},{k:'status',l:'Status',t:'select',o:[['previsto','Previsto'],['aberto','Aberto'],['verificar','A verificar'],['encerrado','Encerrado']]},{k:'publicacao',l:'Publicação',t:'date'},{k:'prazoSubmissao',l:'Prazo de submissão',t:'date'},{k:'recursoTotal',l:'Recurso total (R$)',t:'number'},{k:'linkEdital',l:'Link do edital',t:'url'},{k:'linkSubmissao',l:'Link de submissão',t:'url'},{k:'emailEsclarecimento',l:'E-mail para esclarecimentos',t:'email'},{k:'notas',l:'Observações',t:'textarea'}],{status:'aberto'},o=>{const id=uid();S.sel.edital=id;if(!o.nome)o.nome=o.codigo;return save('editais',id,{...o,criadoEm:todayISO()})}),
+  editEdital:t=>{const e=S.editais[t.dataset.id];form('Editar edital',[{k:'codigo',l:'Código',req:true},{k:'nome',l:'Nome completo',full:true},{k:'distribuidoraId',l:'Distribuidora',t:'select',o:optsDist()},{k:'status',l:'Status',t:'select',o:[['previsto','Previsto'],['aberto','Aberto'],['verificar','A verificar'],['encerrado','Encerrado']]},{k:'publicacao',l:'Publicação',t:'date'},{k:'prazoSubmissao',l:'Prazo de submissão',t:'date'},{k:'recursoTotal',l:'Recurso total (R$)',t:'number'},{k:'linkEdital',l:'Link do edital',t:'url'},{k:'linkSubmissao',l:'Link de submissão',t:'url'},{k:'emailEsclarecimento',l:'E-mail para esclarecimentos',t:'email'},{k:'prazoNota',l:'Nota sobre o prazo',full:true},{k:'notas',l:'Observações',t:'textarea'}],e,o=>save('editais',e.id,o,true))},
+  newDist:()=>form('Cadastrar distribuidora',[{k:'nome',l:'Nome',req:true},{k:'sigla',l:'Sigla curta'},{k:'uf',l:'UF'},{k:'area',l:'Área de concessão'},{k:'site',l:'Site',t:'url'},{k:'emailPEE',l:'E-mail do PEE',t:'email'},{k:'linkSubmissao',l:'Sistema de submissão',t:'url'},{k:'endereco',l:'Endereço',full:true}],{},o=>save('distribuidoras',uid(),{...o,contatos:[]})),
+  editDist:t=>{const d=S.distribuidoras[t.dataset.id];form('Editar distribuidora',[{k:'nome',l:'Nome',req:true},{k:'sigla',l:'Sigla curta'},{k:'uf',l:'UF'},{k:'area',l:'Área de concessão'},{k:'site',l:'Site',t:'url'},{k:'emailPEE',l:'E-mail do PEE',t:'email'},{k:'linkSubmissao',l:'Sistema de submissão',t:'url'},{k:'endereco',l:'Endereço',full:true},{k:'notas',l:'Observações',t:'textarea'}],d,o=>save('distribuidoras',d.id,o,true))},
+  newCliente:()=>form('Novo cliente',CLI_F(),{status:'lead',modalidade:'fp',distribuidoraId:(arr('distribuidoras').find(d=>d.sigla==='Cemig D')||{}).id||''},o=>{const id=uid();S.sel.cliente=id;S.view='clientes';setHash('clientes');return save('clientes',id,{...o,contatos:[],criadoEm:todayISO()})}),
+  editCliente:t=>{const c=S.clientes[t.dataset.id];form('Editar cliente',CLI_F(),c,o=>save('clientes',c.id,o,true))},
+  delCliente:t=>{const c=S.clientes[t.dataset.id];confirmBox('Excluir cliente','Excluir "'+c.nome+'"? Projetos e registros de contato ligados a ele continuam salvos.','Excluir',()=>{S.sel.cliente=null;return del('clientes',c.id)})},
+  addContato:t=>{const col=t.dataset.col,o=S[col][t.dataset.id];form('Adicionar contato',CONT_F,{},v=>{let cs=[...(o.contatos||[])];if(v.principal)cs=cs.map(x=>({...x,principal:false}));cs.push(v);return save(col,o.id,{contatos:cs},true)})},
+  editContato:t=>{const col=t.dataset.col,o=S[col][t.dataset.id],i=+t.dataset.i;form('Editar contato',CONT_F,o.contatos[i],v=>{let cs=[...o.contatos];if(v.principal)cs=cs.map(x=>({...x,principal:false}));cs[i]=v;return save(col,o.id,{contatos:cs},true)},`<button class="btn danger" data-act="delContato" data-col="${col}" data-id="${o.id}" data-i="${i}">Remover</button>`)},
+  delContato:async t=>{const col=t.dataset.col,o=S[col][t.dataset.id];const cs=o.contatos.filter((_,j)=>j!==+t.dataset.i);closeModal();await save(col,o.id,{contatos:cs},true)},
+  addInt:t=>{const key=t.dataset.k,id=t.dataset.id;form('Registrar contato',[{k:'tipo',l:'Tipo',t:'select',o:INT_T},{k:'data',l:'Data',t:'date',req:true},{k:'resumo',l:'O que foi conversado',t:'textarea',req:true},{k:'por',l:'Quem registrou'}],{data:todayISO(),tipo:'Ligação'},o=>{const rec={...o,[key]:id};if(key==='projetoId'){const p=S.projetos[id];if(p)rec.clienteId=p.clienteId}return save('interacoes',uid(),rec)})},
+  delInt:t=>confirmBox('Excluir registro','Excluir este registro de contato?','Excluir',()=>del('interacoes',t.dataset.id)),
+  nextAction:t=>{const col=t.dataset.col,o=S[col][t.dataset.id];form('Próxima ação',[{k:'data',l:'Data',t:'date',req:true},{k:'texto',l:'O que fazer',req:true,full:true}],o.proximaAcao||{data:addD(todayISO(),3)},v=>save(col,o.id,{proximaAcao:v},true))},
+  newProjeto:t=>{const cli=t&&t.dataset&&t.dataset.cli;const c=cli?S.clientes[cli]:null;const ed=arr('editais').find(e=>e.status==='aberto')||arr('editais')[0];
+    form('Novo projeto',PROJ_F(),{clienteId:cli||'',editalId:ed&&ed.id,etapa:'prospeccao',tipologia:c&&c.tipologia,modalidade:c&&c.modalidade||'fp',municipio:c&&c.municipio,nome:c?c.nome+' · '+(ed?ed.codigo:''):'',nivelTensao:'A4'},o=>{const id=uid();const{meEpp,naoRemovivel,tombado,fonteIncentivada,licitacao,...rest}=o;S.sel.projeto=id;S.view='projetos';S.ptab='resumo';setHash('projetos');return save('projetos',id,{...rest,flags:{meEpp,naoRemovivel,tombado,fonteIncentivada,licitacao},ucs:[],acoes:[],custos:{},docs:{},execucao:{},criadoEm:todayISO()})})},
+  editProjeto:t=>{const p=S.projetos[t.dataset.id];form('Editar projeto',PROJ_F(),{...p,...(p.flags||{})},o=>{const{meEpp,naoRemovivel,tombado,fonteIncentivada,licitacao,...rest}=o;return save('projetos',p.id,{...rest,flags:{meEpp,naoRemovivel,tombado,fonteIncentivada,licitacao}},true)})},
+  delProjeto:t=>{const p=S.projetos[t.dataset.id];confirmBox('Excluir projeto','Excluir "'+p.nome+'" com documentos, ações e cronograma?','Excluir',()=>{S.sel.projeto=null;return del('projetos',p.id)})},
+  addUC:t=>{const p=S.projetos[t.dataset.id];form('Adicionar UC',[{k:'numero',l:'Número da instalação / UC',req:true},{k:'descricao',l:'Descrição',hint:'Ex.: prédio principal'}],{},v=>save('projetos',p.id,{ucs:[...(p.ucs||[]),{id:uid(),...v}]},true))},
+  editUC:t=>{const p=S.projetos[t.dataset.id],i=+t.dataset.i;form('Editar UC',[{k:'numero',l:'Número da instalação / UC',req:true},{k:'descricao',l:'Descrição'}],p.ucs[i],v=>{const u=[...p.ucs];u[i]={...u[i],...v};return save('projetos',p.id,{ucs:u},true)},`<button class="btn danger" data-act="delUC" data-id="${p.id}" data-i="${i}">Remover</button>`)},
+  delUC:async t=>{const p=S.projetos[t.dataset.id];closeModal();await save('projetos',p.id,{ucs:p.ucs.filter((_,j)=>j!==+t.dataset.i)},true)},
+  editFolder:t=>{const p=S.projetos[t.dataset.id];form('Pasta no OneDrive',[{k:'pastaOneDrive',l:'Link da pasta',t:'url',full:true,hint:'No OneDrive, use Compartilhar → Copiar link'}],p,v=>save('projetos',p.id,v,true))},
+  editDoc:t=>{const p=S.projetos[t.dataset.id];const key=t.dataset.key;const e=S.editais[p.editalId];const it=e.checklist.find(x=>x.id===key.split('__')[0]);const rec=(p.docs||{})[key]||{};
+    const fs=[{k:'status',l:'Situação',t:'select',o:[['pendente','Falta'],['ok','Recebido e conferido'],['na','Não se aplica']]},{k:'arquivo',l:'Nome do arquivo na pasta',hint:'Ex.: 02_Certidoes/CND_Federal.pdf'},{k:'emissao',l:'Data de emissão',t:'date'},{k:'validade',l:'Válido até',t:'date'},{k:'obs',l:'Observação',t:'textarea'}];
+    modalTitleHint=it?it.dica:'';form(it?it.nome:'Documento',fs,{status:'pendente',...rec},v=>save('projetos',p.id,{docs:{[key]:v}},true));
+    if(it&&it.dica){const b=$('.dlg .body');b.insertAdjacentHTML('afterbegin',`<p class="small muted" style="margin:0">${h(it.ref)} · ${h(it.dica)}</p>`)}},
+  addAcao:t=>{const p=S.projetos[t.dataset.id];form('Adicionar ação',ACAO_F,{uso:'Iluminação',nd:22,nm:12,vida:15},v=>save('projetos',p.id,{acoes:[...(p.acoes||[]),v]},true))},
+  editAcao:t=>{const p=S.projetos[t.dataset.id],i=+t.dataset.i;form('Editar ação',ACAO_F,p.acoes[i],v=>{const a=[...p.acoes];a[i]=v;return save('projetos',p.id,{acoes:a},true)},`<button class="btn danger" data-act="delAcao" data-id="${p.id}" data-i="${i}">Remover</button>`)},
+  delAcao:async t=>{const p=S.projetos[t.dataset.id];closeModal();await save('projetos',p.id,{acoes:p.acoes.filter((_,j)=>j!==+t.dataset.i)},true)},
+  editCustos:t=>{const p=S.projetos[t.dataset.id];form('Custos por rubrica (R$)',CUSTO_F,p.custos||{},v=>{const o={};for(const k in v)o[k]=v[k]===''?0:+v[k];return save('projetos',p.id,{custos:o},true)})},
+  editEtapa:t=>{const p=S.projetos[t.dataset.id];const k=t.dataset.k;form((ETAPAS.find(x=>x[0]===k)||[])[1]||'Etapa',[{k:'status',l:'Situação',t:'select',o:[['a_fazer','A fazer'],['andamento','Em andamento'],['concluida','Concluída']]},{k:'inicio',l:'Início',t:'date'},{k:'fim',l:'Fim',t:'date'}],(p.execucao||{})[k]||{},v=>save('projetos',p.id,{execucao:{[k]:v}},true))},
+};
+let modalTitleHint='';
+document.addEventListener('click',ev=>{const t=ev.target.closest('[data-act]');if(!t)return;const f=ACT[t.dataset.act];if(!f)return;if(S.ro&&/^(new|edit|add|del|submit|next|confirm)/.test(t.dataset.act)&&t.dataset.act!=='newX'){if(!['close'].includes(t.dataset.act)){toast('Você tem acesso somente de leitura');return}}if(t.tagName==='BUTTON'||t.tagName==='A'&&t.getAttribute('href')==='#')ev.preventDefault();f(t,ev)});
+document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target.matches('[data-act][role="button"]'))ev.target.click();if(ev.key==='Enter'&&ev.target.closest('#fm')&&ev.target.tagName==='INPUT'){ev.preventDefault();submitForm()}});
+document.addEventListener('change',async ev=>{const t=ev.target;
+  if(t.dataset.chg==='stage'){if(S.ro){toast('Você tem acesso somente de leitura');render();return}await save('projetos',t.dataset.id,{etapa:t.value},true);toast('Etapa: '+STAGE[t.value])}
+  if(t.id==='cfilter'){S.cfilter=t.value;render()}});
+document.addEventListener('input',ev=>{if(ev.target.id==='q'){S.q=ev.target.value;clearTimeout(S._qt);S._qt=setTimeout(()=>{const pos=ev.target.selectionStart;render();const q=$('#q');if(q){q.focus();q.setSelectionRange(pos,pos)}},250)}});
+function setHash(v){try{history.replaceState(null,'','#'+v)}catch(e){}}
+const h0=(location.hash||'').slice(1);if(NAV.some(n=>n[0]===h0))S.view=h0;
+render();boot();
+</script>
