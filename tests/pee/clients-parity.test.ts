@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { clientMessage, type ClientMessageKind } from "@/lib/messages";
-import { feasibility, phaseIndex } from "@/lib/pee";
+import { feasibility, folderTree, phaseIndex } from "@/lib/pee";
 import { seedCalls, seedClients, seedProjects, seedUtilities } from "@/lib/seed/data";
 import { convertClient } from "@/lib/seed/prototype";
 import { exampleBundles } from "./fixtures";
@@ -55,5 +55,13 @@ describe.each(Object.keys(seedClients))("messages for client %s match the protot
     });
     expect(mine.subject).toBe(theirs.assunto);
     expect(mine.body).toBe(theirs.corpo);
+  });
+});
+
+describe("suggested folder tree matches the prototype", () => {
+  it.each(Object.keys(bundles))("%s", (id) => {
+    const p = proto.S.projetos[id];
+    const b = bundles[id];
+    expect(folderTree(b.project.name, b.units.map((u) => u.number))).toBe(proto.folderTree(p));
   });
 });

@@ -5,8 +5,11 @@ import { NextActionBox } from "@/components/next-action";
 import { ContactList, InteractionDialog, Timeline } from "@/components/people";
 import { ProjectCard } from "@/components/project-card";
 import { ClientFormDialog } from "../client-form";
+import { ProjectFormDialog } from "../../projetos/project-form";
+import { createProject } from "../../projetos/actions";
 import { deleteClientRecord, updateClientRecord } from "../actions";
-import { getClient } from "@/lib/data/clients";
+import { getClient, listClients } from "@/lib/data/clients";
+import { projectFormOptions } from "@/lib/data/project-options";
 import { loadProjectBundles } from "@/lib/data/projects";
 import { listCalls, listContacts, listInteractions, listUtilities } from "@/lib/data/reference";
 import { typologyOptions } from "@/lib/data/typologies";
@@ -28,12 +31,13 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const client = await getClient(supabase, id);
   if (!client) notFound();
 
-  const [contacts, interactions, bundles, calls, utilities] = await Promise.all([
+  const [contacts, interactions, bundles, calls, utilities, clients] = await Promise.all([
     listContacts(supabase, { column: "client_id", id }),
     listInteractions(supabase, { column: "client_id", id }),
     loadProjectBundles(supabase, role),
     listCalls(supabase),
     listUtilities(supabase),
+    listClients(supabase),
   ]);
   const today = todayInBrazil();
   const projects = bundles.filter((b) => b.project.client_id === id);
@@ -125,7 +129,19 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
       </section>
 
       <section className="box">
-        <h3>Projetos</h3>
+        <div className="sec">
+          <h3>Projetos</h3>
+          {canEdit && (
+            <ProjectFormDialog
+              label="Criar projeto"
+              title="Novo projeto"
+              action={createProject}
+              buttonClass="btn sm ghost"
+              defaultClientId={id}
+              {...projectFormOptions(clients, calls)}
+            />
+          )}
+        </div>
         {projects.length ? (
           <div className="cardgrid">
             {projects.map((b) => (

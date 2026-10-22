@@ -82,6 +82,10 @@ export interface Project {
   has_incentivized_source: boolean;
   requires_public_bidding: boolean;
   is_example?: boolean;
+  folder_url?: string | null;
+  responsible?: string | null;
+  next_action_on?: string | null;
+  next_action?: string | null;
 }
 
 /** A project with everything the rules need to evaluate it. */

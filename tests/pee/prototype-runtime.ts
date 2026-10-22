@@ -29,6 +29,7 @@ function extract(): string {
     line(/function nextStep\([^\n]*\n/),
     line(/function verdictOf\([^\n]*\n/),
     block("function tplCliente("),
+    line(/function folderTree\([^\n]*\n(?:[^\n]*\n)*?[^\n]*`\}\n/),
     // The prototype opens a dialog; capture its arguments instead.
     "let __composed = null; function compose(o) { __composed = o; }",
   ].join("\n");
@@ -37,7 +38,7 @@ function extract(): string {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function loadPrototype() {
   const factory = new Function(
-    `${extract()}\nreturn { S, calc, docRows, docSummary, projIssues, nextStep, verdictOf, tplCliente: (c, t) => { tplCliente(c, t); return __composed; } };`,
+    `${extract()}\nreturn { S, calc, docRows, docSummary, projIssues, nextStep, verdictOf, folderTree, tplCliente: (c, t) => { tplCliente(c, t); return __composed; } };`,
   );
   const proto = factory() as {
     S: any;
@@ -47,6 +48,7 @@ export function loadPrototype() {
     projIssues: (p: any) => any[];
     nextStep: (p: any) => { t: string };
     verdictOf: (p: any) => { c: string; t: string };
+    folderTree: (p: any) => string;
     tplCliente: (c: any, kind: string) => { assunto: string; corpo: string; para?: string };
   };
   for (const [id, e] of Object.entries(seedCalls)) proto.S.editais[id] = { id, ...structuredClone(e) };
