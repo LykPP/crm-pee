@@ -1,3 +1,4 @@
+import { Logo } from "@/components/logo";
 import { SideNav } from "@/components/side-nav";
 import { SetupNotice } from "@/components/setup-notice";
 import { signOut } from "@/app/auth/actions";
@@ -15,8 +16,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="app">
       <aside className="side">
         <div className="brand">
-          <b>Painel PEE</b>
-          <span>{org.name}</span>
+          <Logo />
+          <span>Painel PEE · {org.name}</span>
         </div>
         <SideNav />
         <div className="foot keep">
