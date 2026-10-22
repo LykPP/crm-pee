@@ -12,6 +12,8 @@ export async function createTestDb() {
   for (const file of readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort()) {
     await db.exec(readFileSync(join(migrationsDir, file), "utf8"));
   }
+  // Tests create organizations freely; production keeps this closed.
+  await db.exec("update app_settings set value = 'true' where key = 'allow_new_organizations'");
   return db;
 }
 

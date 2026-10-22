@@ -5,8 +5,15 @@ import type { MemberRole } from "./session-labels";
 
 export { ROLE_HINTS, ROLE_LABELS, type MemberRole } from "./session-labels";
 
-/** New organizations are created only when this is on; otherwise people join by invitation. */
-export const allowNewOrganizations = () => process.env.ALLOW_NEW_ORGANIZATIONS === "true";
+/**
+ * Whether people without an invitation may create an organization. The
+ * switch lives in the database (app_settings), which enforces it too.
+ */
+export async function allowNewOrganizations() {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("new_organizations_allowed");
+  return data === true;
+}
 
 /**
  * Signed-in user plus the organization they work in. Pending invitations

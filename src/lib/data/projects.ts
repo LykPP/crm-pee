@@ -12,6 +12,7 @@ import type {
 } from "@/lib/pee";
 import type { MemberRole } from "@/lib/session";
 import type { createClient } from "@/lib/supabase/server";
+import { selectAll } from "./select-all";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -24,15 +25,26 @@ function must<T>(res: { data: T | null; error: { message: string } | null }, wha
 
 export async function loadProjectBundles(supabase: Supabase, role: MemberRole): Promise<ProjectBundle[]> {
   const seeCosts = CAN_SEE_COSTS.includes(role);
-  const [projects, units, documents, actions, costs] = await Promise.all([
-    supabase.from("projects").select("*").order("created_at"),
-    supabase.from("consumer_units").select("*").order("position"),
-    supabase.from("project_documents").select("*"),
-    seeCosts ? supabase.from("efficiency_actions").select("*").order("position") : null,
-    seeCosts ? supabase.from("project_costs").select("*") : null,
+  const [projectRows, unitRows, docRows, actionRows, costRows] = await Promise.all([
+    selectAll<Project>("projects", (a, b) => supabase.from("projects").select("*").order("created_at").order("id").range(a, b)),
+    selectAll<ConsumerUnit & { project_id: string }>("consumer units", (a, b) =>
+      supabase.from("consumer_units").select("*").order("position").order("id").range(a, b),
+    ),
+    selectAll<ProjectDocument & { project_id: string }>("documents", (a, b) =>
+      supabase.from("project_documents").select("*").order("id").range(a, b),
+    ),
+    seeCosts
+      ? selectAll<EfficiencyAction & { project_id: string }>("actions", (a, b) =>
+          supabase.from("efficiency_actions").select("*").order("position").order("id").range(a, b),
+        )
+      : null,
+    seeCosts
+      ? selectAll<ProjectCosts & { project_id: string }>("costs", (a, b) =>
+          supabase.from("project_costs").select("*").order("id").range(a, b),
+        )
+      : null,
   ]);
 
-  const projectRows = must(projects, "projects") as Project[];
   const callIds = [...new Set(projectRows.map((p) => p.call_id).filter((id): id is string => !!id))];
   const callRows = callIds.length
     ? must(
@@ -48,10 +60,6 @@ export async function loadProjectBundles(supabase: Supabase, role: MemberRole): 
     calls.set(c.id, { ...c, rules: parsed.success ? parsed.data : {} });
   }
 
-  const unitRows = must(units, "consumer units") as (ConsumerUnit & { project_id: string })[];
-  const docRows = must(documents, "documents") as (ProjectDocument & { project_id: string })[];
-  const actionRows = actions ? (must(actions, "actions") as (EfficiencyAction & { project_id: string })[]) : null;
-  const costRows = costs ? (must(costs, "costs") as (ProjectCosts & { project_id: string })[]) : null;
 
   // Numeric columns may arrive as strings; the rules convert with Number().
   return projectRows.map((project) => ({
@@ -76,9 +84,11 @@ export async function listExecutionSteps(supabase: Supabase, projectId: string) 
 }
 
 export async function listAllExecutionSteps(supabase: Supabase) {
-  const rows = must(
-    await supabase.from("execution_steps").select("project_id, step_key, status, started_on, finished_on"),
-    "execution steps",
+  return selectAll<ExecutionStep & { project_id: string }>("execution steps", (a, b) =>
+    supabase
+      .from("execution_steps")
+      .select("project_id, step_key, status, started_on, finished_on")
+      .order("id")
+      .range(a, b),
   );
-  return rows as (ExecutionStep & { project_id: string })[];
 }

@@ -22,7 +22,7 @@ export default async function NewOrganizationPage() {
   return (
     <div className="solo">
       <div className="box">
-        {allowNewOrganizations() ? (
+        {(await allowNewOrganizations()) ? (
           <>
             <div>
               <h1>Bem-vindo</h1>

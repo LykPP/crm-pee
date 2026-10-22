@@ -1,5 +1,6 @@
 /** Clients of the organization. */
 import type { createClient } from "@/lib/supabase/server";
+import { selectAll } from "./select-all";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 
@@ -46,7 +47,9 @@ function must<T>(res: { data: T | null; error: { message: string } | null }, wha
 }
 
 export async function listClients(supabase: Supabase) {
-  const rows = must(await supabase.from("clients").select("*"), "clients") as ClientRow[];
+  const rows = await selectAll<ClientRow>("clients", (a, b) =>
+    supabase.from("clients").select("*").order("id").range(a, b),
+  );
   return rows.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 }
 

@@ -120,6 +120,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field.check input { width: auto; }
 
 .split { display: grid; grid-template-columns: minmax(250px, 320px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.split > * { min-width: 0; }
 .cards { display: flex; flex-direction: column; gap: 6px; }
 .card { box-sizing: border-box; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; min-width: 0; border: 1px solid transparent; color: inherit; text-decoration: none; }
 .card:hover { background: var(--soft); }
@@ -295,7 +296,7 @@ a.item.news:hover .t { color: var(--accent); }
 .who b { color: var(--ink-2); font-weight: 600; }
 
 @media (max-width: 980px) {
-  .split, .tiles { grid-template-columns: 1fr; }
+  .split, .tiles { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 760px) {

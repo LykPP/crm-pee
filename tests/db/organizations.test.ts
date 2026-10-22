@@ -37,6 +37,16 @@ describe("create_organization", () => {
     await expect(createOrg(ANA, "Outra")).rejects.toThrow(/already belongs/);
   });
 
+  it("is closed unless the product switch allows new organizations", async () => {
+    await db.exec("update app_settings set value = 'false' where key = 'allow_new_organizations'");
+    await expect(createOrg(ANA, "ESCO A")).rejects.toThrow(/ask for an invitation/);
+    const allowed = await asUser(db, ANA, (tx) =>
+      tx.query<{ ok: boolean }>("select public.new_organizations_allowed() as ok"),
+    );
+    expect(allowed.rows[0].ok).toBe(false);
+    await expect(asUser(db, ANA, (tx) => tx.query("select * from app_settings"))).rejects.toThrow(/permission denied/);
+  });
+
   it("refuses anonymous callers", async () => {
     await expect(
       asUser(db, "", (tx) => tx.query("select public.create_organization('X')")),

@@ -10,7 +10,7 @@ export async function createOrganization(
   _prev: CreateOrgState,
   form: FormData,
 ): Promise<CreateOrgState> {
-  if (!allowNewOrganizations()) return { error: "Peça um convite ao administrador da sua ESCO." };
+  if (!(await allowNewOrganizations())) return { error: "Peça um convite ao administrador da sua ESCO." };
   const name = String(form.get("name") ?? "").trim();
   if (name.length < 2) return { error: "Digite o nome da empresa." };
 
