@@ -88,50 +88,50 @@ export default async function ConferencePage() {
         return (
           <section key={b.project.id} className="box">
             <h3>{b.project.name}</h3>
-            <dl className="facts">
+            <div className="facts">
               {k ? (
                 <>
-                  <div>
-                    <dt>Valor PEE</dt>
-                    <dd className="num">{mi(k.peeTotal)}</dd>
+                  <div className="fact">
+                    <span className="l">Valor PEE</span>
+                    <span className="v big num">{mi(k.peeTotal)}</span>
                     {ref && (
-                      <dd className="help">
+                      <span className="help">
                         Protótipo: {mi(ref.pee)} <Match ok={peeOk} />
-                      </dd>
+                      </span>
                     )}
                   </div>
-                  <div>
-                    <dt>RCB</dt>
-                    <dd className="num">
+                  <div className="fact">
+                    <span className="l">RCB</span>
+                    <span className="v big num">
                       {nf(k.rcbPee, 3)}
                       {k.rcbMax != null && <span className="help"> limite {nf(k.rcbMax)}</span>}
-                    </dd>
+                    </span>
                     {ref && (
-                      <dd className="help">
+                      <span className="help">
                         Protótipo: {nf(ref.rcb, 3)} <Match ok={rcbOk} />
-                      </dd>
+                      </span>
                     )}
                   </div>
-                  <div>
-                    <dt>Limites por rubrica</dt>
-                    <dd>
+                  <div className="fact">
+                    <span className="l">Limites por rubrica</span>
+                    <span className="v">
                       {k.checks.filter((c) => c.ok).length} de {k.checks.length} dentro do limite
-                    </dd>
+                    </span>
                   </div>
                 </>
               ) : (
-                <div>
-                  <dt>Valor PEE e RCB</dt>
-                  <dd className="help">O seu papel não permite ver custos.</dd>
+                <div className="fact">
+                  <span className="l">Valor PEE e RCB</span>
+                  <span className="help">O seu papel não permite ver custos.</span>
                 </div>
               )}
-              <div>
-                <dt>Documentos</dt>
-                <dd>
+              <div className="fact">
+                <span className="l">Documentos</span>
+                <span className="v">
                   {docs.ok} de {docs.total} completos
-                </dd>
+                </span>
               </div>
-            </dl>
+            </div>
             <div>
               <h4>Alertas</h4>
               {issues.length ? (

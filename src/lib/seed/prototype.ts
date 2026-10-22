@@ -154,7 +154,12 @@ export const STAGE_FROM_PROTO: Record<string, string> = {
   perdido: "lost",
 };
 
-const CALL_STATUS: Record<string, string> = { aberto: "open", verificar: "to_verify", encerrado: "closed" };
+const CALL_STATUS: Record<string, string> = {
+  previsto: "upcoming",
+  aberto: "open",
+  verificar: "to_verify",
+  encerrado: "closed",
+};
 const CLIENT_STATUS: Record<string, string> = {
   lead: "lead",
   qualificado: "qualified",

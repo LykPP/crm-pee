@@ -1,5 +1,10 @@
-import { ComingSoon } from "@/components/coming-soon";
+import { redirect } from "next/navigation";
+import { listUtilities } from "@/lib/data/reference";
+import { createClient } from "@/lib/supabase/server";
 
-export default function DistribuidorasPage() {
-  return <ComingSoon title="Distribuidoras" step="etapa 5" />;
+/** Opens the first utility; the list itself lives in the layout. */
+export default async function UtilitiesPage() {
+  const utilities = await listUtilities(await createClient());
+  if (utilities.length) redirect(`/distribuidoras/${utilities[0].id}`);
+  return null;
 }
