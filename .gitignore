@@ -8,3 +8,6 @@ coverage/
 .DS_Store
 *.log
 *.tsbuildinfo
+notas/.obsidian/workspace*.json
+notas/.obsidian/cache
+notas/.trash/
